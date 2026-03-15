@@ -1,6 +1,6 @@
-use std::path::Path;
-use std::collections::HashMap;
 use crate::error::FfmpegError;
+use std::collections::HashMap;
+use std::path::Path;
 
 /// Aggregated information about a media file.
 #[derive(Debug, Clone)]
@@ -16,12 +16,16 @@ pub struct MediaInfo {
 impl MediaInfo {
     /// Best video stream in the file, if any.
     pub fn best_video(&self) -> Option<&StreamInfo> {
-        self.streams.iter().find(|s| matches!(s.kind, StreamKind::Video { .. }))
+        self.streams
+            .iter()
+            .find(|s| matches!(s.kind, StreamKind::Video { .. }))
     }
 
     /// Best audio stream in the file, if any.
     pub fn best_audio(&self) -> Option<&StreamInfo> {
-        self.streams.iter().find(|s| matches!(s.kind, StreamKind::Audio { .. }))
+        self.streams
+            .iter()
+            .find(|s| matches!(s.kind, StreamKind::Audio { .. }))
     }
 }
 
@@ -66,7 +70,9 @@ pub fn probe(path: &Path) -> Result<MediaInfo, FfmpegError> {
     }
     #[cfg(not(feature = "ffmpeg"))]
     {
-        Err(FfmpegError::NotAvailable("FFmpeg feature not compiled".into()))
+        Err(FfmpegError::NotAvailable(
+            "FFmpeg feature not compiled".into(),
+        ))
     }
 }
 
@@ -76,8 +82,7 @@ fn probe_impl(path: &Path) -> Result<MediaInfo, FfmpegError> {
 
     ffmpeg::init().map_err(|e| FfmpegError::InitFailed(e.to_string()))?;
 
-    let input = ffmpeg::format::input(&path)
-        .map_err(|e| FfmpegError::OpenFailed(e.to_string()))?;
+    let input = ffmpeg::format::input(&path).map_err(|e| FfmpegError::OpenFailed(e.to_string()))?;
 
     let format_name = input.format().name().to_owned();
 
@@ -104,7 +109,9 @@ fn probe_impl(path: &Path) -> Result<MediaInfo, FfmpegError> {
             Type::Video => {
                 let decoder = ffmpeg_next::codec::context::Context::from_parameters(codec_params)
                     .map_err(|e| FfmpegError::CodecError(e.to_string()))?;
-                let video = decoder.decoder().video()
+                let video = decoder
+                    .decoder()
+                    .video()
                     .map_err(|e| FfmpegError::CodecError(e.to_string()))?;
 
                 let avg_fr = stream.avg_frame_rate();
@@ -119,7 +126,9 @@ fn probe_impl(path: &Path) -> Result<MediaInfo, FfmpegError> {
             Type::Audio => {
                 let decoder = ffmpeg_next::codec::context::Context::from_parameters(codec_params)
                     .map_err(|e| FfmpegError::CodecError(e.to_string()))?;
-                let audio = decoder.decoder().audio()
+                let audio = decoder
+                    .decoder()
+                    .audio()
                     .map_err(|e| FfmpegError::CodecError(e.to_string()))?;
                 StreamKind::Audio {
                     sample_rate: audio.rate(),
@@ -142,7 +151,11 @@ fn probe_impl(path: &Path) -> Result<MediaInfo, FfmpegError> {
             kind,
             time_base_num: tb.0,
             time_base_den: tb.1,
-            duration_ts: if stream.duration() > 0 { Some(stream.duration()) } else { None },
+            duration_ts: if stream.duration() > 0 {
+                Some(stream.duration())
+            } else {
+                None
+            },
         });
     }
 

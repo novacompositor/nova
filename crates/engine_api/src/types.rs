@@ -59,8 +59,12 @@ impl Resolution {
         Self { width, height }
     }
 
-    pub fn hd() -> Self { Self::new(1920, 1080) }
-    pub fn uhd() -> Self { Self::new(3840, 2160) }
+    pub fn hd() -> Self {
+        Self::new(1920, 1080)
+    }
+    pub fn uhd() -> Self {
+        Self::new(3840, 2160)
+    }
 }
 
 /// Color profile / working color space.
@@ -101,14 +105,28 @@ pub struct FrameRate {
 }
 
 impl FrameRate {
-    pub fn new(num: u32, den: u32) -> Self { Self { num, den } }
-    pub fn fps24() -> Self { Self::new(24, 1) }
-    pub fn fps25() -> Self { Self::new(25, 1) }
-    pub fn fps30() -> Self { Self::new(30, 1) }
-    pub fn fps60() -> Self { Self::new(60, 1) }
-    pub fn fps_ntsc() -> Self { Self::new(30000, 1001) }
+    pub fn new(num: u32, den: u32) -> Self {
+        Self { num, den }
+    }
+    pub fn fps24() -> Self {
+        Self::new(24, 1)
+    }
+    pub fn fps25() -> Self {
+        Self::new(25, 1)
+    }
+    pub fn fps30() -> Self {
+        Self::new(30, 1)
+    }
+    pub fn fps60() -> Self {
+        Self::new(60, 1)
+    }
+    pub fn fps_ntsc() -> Self {
+        Self::new(30000, 1001)
+    }
 
-    pub fn as_f64(&self) -> f64 { self.num as f64 / self.den as f64 }
+    pub fn as_f64(&self) -> f64 {
+        self.num as f64 / self.den as f64
+    }
 }
 
 /// Property value type — covers all animatable value kinds.

@@ -4,7 +4,7 @@ use std::path::PathBuf;
 #[test]
 fn test_gif_encode_stub() {
     // In a real environment, we'd need a sample input file.
-    // For now, we'll test with a non-existent file to at least check 
+    // For now, we'll test with a non-existent file to at least check
     // that the FFmpeg command execution path is reached and returns an error.
     let input = PathBuf::from("non_existent.mp4");
     let output = PathBuf::from("output.gif");
@@ -16,8 +16,8 @@ fn test_gif_encode_stub() {
     };
 
     let result = encode_gif(&input, &output, &options);
-    
-    // It should fail because the file doesn't exist, 
+
+    // It should fail because the file doesn't exist,
     // but the error variant should be EncodeError or OpenFailed.
     assert!(result.is_err());
     println!("Test result (expected error): {:?}", result);

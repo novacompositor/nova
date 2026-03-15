@@ -1,0 +1,295 @@
+Advanced Chroma Keyer Built-in Plugin Plan
+
+Purpose:
+- Define an out-of-the-box chroma key plugin with professional quality and fast workflow.
+- Deliver functionality comparable to high-end keying tools, while keeping implementation fully original (clean-room).
+
+Naming note:
+- Use internal product name (for example: "Spectrum Keyer" or "Ultra Keyer Pro").
+- Avoid third-party trademark usage in product branding.
+
+==================================================
+1) Product goal
+==================================================
+Create a built-in keyer that lets users:
+- isolate foreground from green/blue screen quickly,
+- preserve fine edge details (hair, semi-transparency, motion blur),
+- suppress spill naturally,
+- produce stable, production-ready mattes with minimal steps.
+
+User promise:
+- "Fast first key in seconds, deep control when needed."
+
+==================================================
+2) Core UX model
+==================================================
+Panel structure:
+1. Quick Key
+- Screen Color picker
+- Multi-color sampling (primary key color + additional shades/colors)
+- Remove selected color swatch (point delete from sampled set)
+- Key strength
+- Despill amount
+- Matte cleanup (clip black/white)
+
+2. Matte Refinement
+- Edge softness
+- Shrink/Grow
+- Decontaminate edge
+- Fine detail recovery
+
+3. Advanced Controls
+- Color-space aware sampling
+- Multi-sample screen model
+- Shadow/highlight protection
+- Noise-aware matte stabilizer
+- Soft selection brush for fine regions (hair, fur, semi-transparent edges)
+- Subtract brush mode for point removal of unwanted sampled tones/regions
+
+4. Diagnostics View
+- Composite
+- Matte (grayscale)
+- Foreground
+- Background
+- Spill heatmap
+
+Workflow:
+1. Pick key color
+1.1 Add extra shades/colors to key model where screen is uneven
+1.2 Point-remove incorrect shades/colors from the key model
+2. Generate first matte
+3. Adjust spill suppression
+4. Refine edges
+5. Use diagnostics to finalize
+
+==================================================
+3) Technical pipeline
+==================================================
+Stage A: Preprocess
+- Convert to working color space (linear/sRGB policy)
+- Optional denoise for cleaner matte signal
+
+Stage B: Background model
+- Build screen color model from sampled regions
+- Support single and multi-cluster background color modeling
+
+Stage C: Matte extraction
+- Compute foreground probability per pixel
+- Output base alpha matte
+
+Stage D: Matte cleanup
+- Clip black/white
+- Morphological cleanup (open/close)
+- Temporal stabilization (optional for video)
+
+Stage E: Edge refinement
+- Subpixel edge handling
+- Detail recovery for hair/fur/soft edges
+- Partial transparency preservation
+
+Stage F: Spill suppression
+- Hue-direction aware despill
+- Skin-tone and highlight protection
+- Edge-biased spill correction
+
+Stage G: Recombine
+- Output RGBA with premult/unpremult correctness
+- Optional auxiliary outputs (matte, core matte, edge matte, spill mask)
+
+==================================================
+4) Key algorithms (implementation targets)
+==================================================
+- Color-difference key model (green/blue dominant background)
+- Soft classification and confidence weighting
+- Local adaptive thresholds based on neighborhood statistics
+- Guided edge refinement using luminance/chroma gradients
+- Optional temporal smoothing with motion-aware constraints
+
+Quality objective:
+- strong separation with minimal chatter,
+- stable edges under motion,
+- limited color contamination in foreground.
+
+==================================================
+5) Performance strategy
+==================================================
+- GPU-first processing path for interactive preview
+- CPU fallback for reliability
+- Tile/ROI processing for faster updates
+- Quality presets:
+  - Draft (fast preview)
+  - Standard (editing)
+  - Final (high quality)
+
+Target behavior:
+- Immediate feedback for common parameter changes
+- Deterministic final render output
+
+==================================================
+6) Host integration
+==================================================
+Plugin type:
+- Built-in effect in compositor effect stack
+
+Inputs:
+- Foreground plate
+- Optional garbage matte
+- Optional holdout matte
+
+Outputs:
+- Comped result
+- Diagnostic outputs/passes
+
+Timeline integration:
+- All main parameters keyframe-able
+- Preset snapshots for quick reuse
+
+==================================================
+7) Controls (MVP parameter set)
+==================================================
+Basic:
+- Screen Color
+- Additional Key Colors (list)
+- Remove Selected Color/Swatch
+- Key Gain
+- Black Clip
+- White Clip
+- Despill
+
+Refine:
+- Edge Radius
+- Edge Softness
+- Edge Decontaminate
+- Detail Restore
+- Soft Brush Strength/Radius (for hair/detail selection)
+- Brush Mode: Add / Subtract / Restore
+
+Advanced:
+- Background Model Samples
+- Shadow Protection
+- Highlight Protection
+- Temporal Stabilization
+- Noise Reduction
+
+Mask and Tracking:
+- Full support for masks from main project (layer masks, garbage masks, holdout masks)
+- Mask link mode: updates in main timeline are reflected in Keying Room
+- Tracking support for masks and objects across frame ranges (forward/backward)
+- Track confidence threshold and re-track tools for unstable sections
+
+==================================================
+8) Diagnostics and artist tools
+==================================================
+Required scopes/views:
+- Matte view with clipping warning overlay
+- Edge overlay
+- Spill map overlay
+- Before/after split view
+
+Artist utilities:
+- One-click "Auto Key"
+- Presets: Studio Green, Studio Blue, Uneven Screen, Low Light
+- "Fix common issues" wizard (chatter, holes, edge tint)
+
+==================================================
+9) Test plan
+==================================================
+Test categories:
+1. Unit tests
+- math primitives and threshold logic
+
+2. Golden image tests
+- known plates with reference mattes
+
+3. Video stability tests
+- temporal consistency across frames
+
+4. Performance tests
+- 1080p/4K keying latency targets
+
+5. Robustness tests
+- noisy footage, compression artifacts, uneven lighting
+
+Acceptance quality metrics:
+- matte edge stability score
+- foreground color retention score
+- spill suppression effectiveness
+
+==================================================
+10) Roadmap
+==================================================
+Phase 1 (MVP):
+- fast auto key
+- core matte extraction
+- basic despill
+- matte diagnostics
+
+Phase 2:
+- advanced edge refinement
+- temporal stabilization
+- expanded presets
+
+Phase 3:
+- ML-assisted guidance (optional)
+- scene-aware adaptive tuning
+
+==================================================
+11) Legal/compliance
+==================================================
+- Implement all logic from scratch (clean-room).
+- Do not copy third-party source code, binaries, preset data, or protected assets.
+- Functional parity is acceptable; code/data cloning is not.
+
+==================================================
+12) Definition of Done
+==================================================
+- Built-in keyer creates production-usable keys on common green/blue screen footage.
+- User can complete most keying jobs with Quick Key + Matte Refinement panels.
+- User can sample multiple shades/colors for difficult screens.
+- Soft brush selection is usable for hair and fine edge areas.
+- Plugin remains stable in long sessions and render queue.
+- Outputs are consistent between preview and final render.
+
+==================================================
+13) Dedicated workspace room/page
+==================================================
+- Plugin opens in a dedicated full-screen in-app room/page (\"Keying Room\") for focused work.
+- Keying Room contains:
+  - large preview viewport,
+  - side controls for Quick/Refine/Advanced,
+  - diagnostics strip,
+  - before/after comparison tools.
+  - mask/tracking subpanel (project mask import/link, object tracking bind, track edit tools).
+- Enter/exit Keying Room must preserve timeline context and non-destructive edits.
+
+==================================================
+14) Next steps
+==================================================
+1. Finalize effect parameter schema (v0.1).
+2. Build CPU reference implementation for core key extraction.
+3. Add GPU path for interactive preview.
+4. Implement project mask linking + tracked mask/object propagation.
+5. Implement diagnostics views and presets.
+6. Validate on real production test plates.
+
+
+==================================================
+MANDATORY UI INTEGRATION REQUIREMENT
+==================================================
+- This plugin must operate strictly inside our program interface.
+- All user-facing controls, previews, settings, timeline actions, and final outputs must be handled in our native UI.
+- External tools/runtimes (including Blender/ComfyUI or similar) are backend workers only and must not replace or become the primary user interface.
+- The user workflow must remain fully native to our application from start to finish.
+
+==================================================
+NATIVE GPU ACCELERATION REQUIREMENT
+==================================================
+- Full native GPU acceleration is mandatory.
+- If a discrete or integrated GPU is available, heavy compute/render/inference workloads must be delegated to GPU by default.
+- CPU fallback is allowed only when GPU is unavailable, unsupported, or explicitly disabled by user policy.
+- Runtime must include GPU capability detection and automatic backend selection for best performance/stability.
+
+Apple Silicon requirement:
+- Full support for Apple Silicon M1, M2, M3, and M4 families is mandatory.
+- On macOS, GPU paths must use Metal-native acceleration for supported workloads.
+- Feature parity and reliability targets on Apple Silicon must match other primary platforms for core plugin workflows.

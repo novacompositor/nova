@@ -1,0 +1,226 @@
+Blender 5+ Native Bridge Plan (External DCC Integration)
+
+Purpose:
+- Define an external bridge to real Blender version 5 and above.
+- Enable seamless round-trip between compositor and installed Blender runtime.
+
+Core principle:
+- Blender runs as external process/service.
+- Host app remains stable and isolated from Blender crashes.
+- System Blender installation is required for this plugin.
+- User must install a dedicated bridge add-on inside Blender manually.
+
+==================================================
+1) User promise
+==================================================
+- User can send a scene/layer from compositor to Blender 5+ with one click.
+- User can get rendered passes back automatically into timeline/compositor stack.
+- User can iterate quickly with update-sync workflow.
+
+==================================================
+2) Supported Blender versions
+==================================================
+Baseline support:
+- Blender 5.0+
+
+Required user setup:
+- Blender 5+ must be installed in OS.
+- Bridge add-on package must be installed and enabled in Blender by user/admin.
+
+Compatibility policy:
+- Officially test against latest stable Blender 5.x and one LTS-like target when available.
+- Keep adapter compatibility matrix per Blender minor version.
+
+==================================================
+3) Bridge architecture
+==================================================
+Components:
+1. Host Bridge Panel
+- Send to Blender
+- Update in Blender
+- Reimport passes
+- Link status and diagnostics
+
+2. Blender Locator
+- Detect installed Blender executables (Windows/macOS/Linux)
+- Version validation (>= 5.0)
+- User override path option
+
+3. Command Orchestrator
+- Starts Blender headless/GUI modes
+- Passes job configs
+- Monitors process lifecycle
+
+4. Scene Exchange Layer
+- Export host scene package (JSON + assets)
+- Import Blender outputs (EXR multilayer / image sequences / metadata)
+
+5. Sync State Registry
+- Tracks object IDs, material IDs, camera links
+- Keeps mapping between host entities and Blender entities
+
+==================================================
+4) Data interchange format
+==================================================
+Host -> Blender package:
+- scene_descriptor.json (versioned)
+- assets/ (models, textures, hdri)
+- animation/ (channels, keyframes)
+- render_profile.json
+
+Blender -> Host package:
+- render_passes/ (beauty, depth, shadow, normal, IDs)
+- sync_report.json
+- diagnostics.log
+
+Preferred image format:
+- EXR (multilayer) for production
+- PNG/JPG proxies for fast preview where applicable
+
+==================================================
+5) Integration modes
+==================================================
+Mode A: Live Link (iterative)
+- Frequent sync of transforms/camera/light/material essentials
+- Fast preview updates
+
+Mode B: Publish Render
+- Deterministic final render job
+- Locked profile, reproducible output
+
+Mode C: Open in Blender
+- Opens full scene package in user Blender GUI for manual edits
+- Re-import changes back to host
+
+==================================================
+6) Blender-side adapter
+==================================================
+Requirements:
+- Dedicated Blender add-on script bundle for bridge protocol
+- CLI/headless entry script for automated jobs
+- Standardized outputs and status reporting
+- Add-on installation/upgrade checker from host side (warn if missing/outdated)
+
+Responsibilities:
+- Parse scene package
+- Build/update Blender scene
+- Execute render with selected profile
+- Emit passes + sync report
+
+==================================================
+7) Security and process isolation
+==================================================
+- Blender process runs isolated from host process memory.
+- Timeouts and job cancellation are mandatory.
+- Worker crash handling:
+  - host continues running
+  - user sees clear error and retry option
+
+==================================================
+8) Performance strategy
+==================================================
+- Incremental sync (send only changed objects/channels)
+- Asset fingerprint cache
+- Background rendering queue
+- Proxy render mode for timeline preview
+
+==================================================
+9) UX flow
+==================================================
+Typical flow:
+1. User creates 3D layer in host
+2. Clicks "Send to Blender"
+3. Bridge validates Blender 5+ installation and add-on availability
+4. Scene package exported
+5. Blender job runs (headless or GUI)
+6. Passes imported and composited automatically
+7. User tweaks and resyncs as needed
+
+First-run onboarding:
+1. Locate Blender executable
+2. Validate version >= 5.0
+3. Check bridge add-on installed/enabled
+4. Offer guided setup instructions if missing
+
+==================================================
+10) OS-specific requirements
+==================================================
+Linux:
+- handle AppImage/system package Blender paths
+- Wayland/X11 process launching compatibility
+
+Windows:
+- handle standard install path + custom path
+- quote-safe command invocation
+
+macOS:
+- detect app bundle binary path
+- permissions and sandbox-aware file access where needed
+
+==================================================
+11) Diagnostics and support
+==================================================
+Bridge diagnostics panel should show:
+- Blender executable path
+- detected version
+- adapter version
+- last sync status
+- last render duration
+- error logs shortcut
+
+==================================================
+12) MVP scope
+==================================================
+Include:
+- Blender path detection
+- version check (>= 5.0)
+- bridge add-on presence/version check
+- one-click scene export/import
+- beauty + depth + shadow pass reimport
+- async job handling with cancel
+
+Exclude initially:
+- full material node parity
+- advanced geometry nodes editing from host
+- deep rig/character workflow parity
+
+==================================================
+13) Acceptance criteria
+==================================================
+- Bridge connects to real Blender 5+ installation on Linux/Windows/macOS.
+- Bridge validates required Blender add-on and shows guided fix steps if missing.
+- User can round-trip a basic scene and receive passes in host timeline.
+- Errors are recoverable and do not crash host app.
+- Mapping IDs persist across project save/reopen.
+
+==================================================
+14) Next implementation steps
+==================================================
+1. Define bridge protocol v0.1 (JSON schema + status codes).
+2. Implement Blender locator + version validator.
+3. Build add-on installer/checker flow and setup guidance.
+4. Build minimal Blender adapter scripts (headless render path).
+5. Integrate async job runner in host.
+6. Add diagnostics UI and first compatibility matrix.
+
+
+==================================================
+MANDATORY UI INTEGRATION REQUIREMENT
+==================================================
+- Primary controls, status, queue, and timeline integration must be in our native UI.
+- This bridge explicitly supports opening Blender GUI for deep 3D editing (AE<->C4D style workflow).
+- User must be able to return and continue work in host UI with synchronized results.
+- External Blender UI is optional deep-edit mode, not a replacement for host-side control flow.
+
+==================================================
+NATIVE GPU ACCELERATION REQUIREMENT
+==================================================
+- Full native GPU acceleration is mandatory.
+- If a discrete or integrated GPU is available, heavy compute/render/inference workloads must be delegated to GPU by default.
+- CPU fallback is allowed only when GPU is unavailable, unsupported, or explicitly disabled by user policy.
+- Runtime must include GPU capability detection and automatic backend selection for best performance/stability.
+
+Apple Silicon requirement:
+- Full support for Apple Silicon M1, M2, M3, and M4 families is mandatory.
+- On macOS, GPU paths must use Metal-native acceleration for supported workloads.
+- Feature parity and reliability targets on Apple Silicon must match other primary platforms for core plugin workflows.

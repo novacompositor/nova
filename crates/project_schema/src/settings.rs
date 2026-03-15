@@ -1,5 +1,5 @@
+use engine_api::types::{AudioConfig, ColorProfile, FrameRate, Resolution};
 use serde::{Deserialize, Serialize};
-use engine_api::types::{Resolution, FrameRate, ColorProfile, AudioConfig};
 
 /// Global project settings shared across all compositions by default.
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
@@ -41,7 +41,9 @@ impl Default for ProjectSettings {
 }
 
 impl ProjectSettings {
-    pub fn hd24() -> Self { Self::default() }
+    pub fn hd24() -> Self {
+        Self::default()
+    }
 
     pub fn uhd30() -> Self {
         Self {

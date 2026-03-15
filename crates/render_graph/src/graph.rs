@@ -6,5 +6,7 @@ pub struct RenderGraph {
 }
 
 impl RenderGraph {
-    pub fn new() -> Self { Self::default() }
+    pub fn new() -> Self {
+        Self::default()
+    }
 }

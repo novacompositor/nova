@@ -1,0 +1,218 @@
+First Room Prompt: Fast Edit XML Timeline Workspace
+
+Role:
+You are a Principal Video Editing Systems Architect.
+Design and implement the very first workspace/tab ("room") of our application as a fast, simple editing page.
+
+==================================================
+0) Mission
+==================================================
+Build the first and most basic room/page as a lightweight editing environment for:
+- importing timeline XML from popular NLE tools,
+- doing simple editorial operations quickly,
+- syncing multicam and audio efficiently,
+- staying highly responsive without relying on caching.
+
+This is not the advanced compositing room.
+This is the "first touch" fast edit room.
+
+==================================================
+1) Product intent
+==================================================
+The first room should let users:
+- open/import timeline XML from major editing tools,
+- inspect and validate imported timeline structure,
+- perform standard rough-cut actions,
+- sync footage and separate audio by timecode or waveform,
+- assemble clean edit timeline before moving to advanced rooms.
+
+Primary value:
+- speed, simplicity, reliability.
+
+==================================================
+2) Core features (must-have)
+==================================================
+1. XML timeline import
+- Support timeline XML imports from widely used NLE ecosystems (via compatibility parsers/mappers).
+- Import report: what mapped correctly, what was approximated, what was skipped.
+
+2. Standard editing timeline
+- Add/remove/move clips
+- Trim in/out
+- Split and ripple basics
+- Basic track operations (video/audio)
+- Snap and markers
+- New timeline creation with:
+  - resolution presets and manual resolution input
+  - frame rate presets and manual FPS input
+  - bit depth selection: 8-bit / 16-bit / 32-bit color
+  - professional color profile selection
+
+3. Multicam sync
+- Sync multiple camera clips by:
+  - audio waveform matching
+  - timecode alignment
+- Allow user to pick sync source and reference camera
+
+4. External audio sync
+- Sync separate audio recorder tracks with camera footage by:
+  - timecode
+  - waveform
+- Show confidence score and offset diagnostics
+
+5. Lightweight playback
+- Fast timeline scrubbing and playback
+- Immediate response to edit actions
+
+==================================================
+3) Performance model (critical)
+==================================================
+Hard rule:
+- This room must run fast and remain responsive without cache-dependent behavior.
+
+Implementation policy:
+- No heavy precompute pipeline as default requirement.
+- Decode and playback path should favor low-latency direct processing.
+- Caching is not required for this room's core workflow and must not be a dependency for normal use.
+- If optional buffering exists, it must be minimal and transparent.
+
+==================================================
+4) XML interoperability strategy
+==================================================
+Support strategy:
+- Parse and normalize incoming XML timeline variants into internal timeline schema.
+- Build compatibility matrix per source format/version.
+- Provide deterministic mapping and explicit fallback rules.
+
+Import diagnostics:
+- mapped items
+- approximated items
+- unsupported features
+- relink status for media
+
+==================================================
+5) UX layout for the first room
+==================================================
+Page name:
+- "Edit Room" (or equivalent)
+
+Layout:
+- Source/Program viewer
+- Timeline (primary focus)
+- Media bin
+- Sync panel (timecode/waveform)
+- Import report panel
+
+UX principles:
+- minimal controls,
+- keyboard-driven editing,
+- clear timeline readability,
+- instant feedback for edits.
+
+Project panel timeline management:
+- In Project panel, right-click on created timeline/composition opens "Timeline Settings".
+- User can edit timeline parameters after creation:
+  - resolution
+  - frames per second (FPS)
+  - bit depth (8/16/32 bpc)
+  - color profile
+
+==================================================
+6) Sync subsystem details
+==================================================
+Waveform sync:
+- transient/correlation matching
+- offset estimation with confidence scoring
+- manual nudge/override
+
+Timecode sync:
+- read clip and audio timecode metadata
+- detect mismatches and drift
+- auto align with manual correction controls
+
+Multicam grouping:
+- create multicam group from synced sources
+- allow quick angle switching in timeline (MVP basic)
+
+==================================================
+7) Scope boundaries
+==================================================
+In scope:
+- fast rough cut and sync prep
+- XML import and basic cleanup
+
+Out of scope for this room:
+- advanced VFX compositing
+- heavy effect stacks
+- deep color finishing toolset
+
+==================================================
+8) Data model and persistence
+==================================================
+Store:
+- imported timeline source metadata
+- mapping decisions and warnings
+- sync offsets and confidence
+- multicam grouping state
+- timeline settings profile per timeline:
+  - width/height
+  - fps
+  - bit depth
+  - color profile
+
+All edits are non-destructive and project-safe.
+
+==================================================
+9) Testing and quality
+==================================================
+Required tests:
+- XML import regression suite
+- edit action correctness tests (trim/split/ripple)
+- sync accuracy tests (waveform/timecode)
+- responsiveness benchmarks (scrub latency/playback)
+
+Success metrics:
+- import success rate
+- sync accuracy thresholds
+- timeline interaction latency
+
+==================================================
+10) Definition of Done
+==================================================
+- User can import XML timeline from common NLE sources.
+- User can perform basic edits quickly in a standard timeline.
+- User can sync multicam and external audio by timecode or waveform.
+- User can create timeline with preset/manual resolution and FPS.
+- User can change resolution/FPS/bit depth/color profile via Project panel right-click settings.
+- User can choose 8/16/32-bit color and professional color profiles per timeline.
+- Room remains responsive and usable without cache dependency.
+- Import/sync diagnostics are clear and actionable.
+
+==================================================
+11) Output format requirement
+==================================================
+When asked to "start", provide:
+1. Edit Room architecture blueprint v0.1
+2. XML compatibility matrix draft
+3. Timeline MVP task breakdown
+4. Sync engine plan (waveform + timecode)
+5. Latency performance budget
+6. Test matrix and rollout phases
+
+==================================================
+MANDATORY UI INTEGRATION REQUIREMENT
+==================================================
+- This room must operate strictly inside our native application interface.
+- All timeline editing, sync operations, and diagnostics must be performed in-app.
+- External tools must not be required for the normal workflow.
+
+==================================================
+NATIVE GPU ACCELERATION REQUIREMENT
+==================================================
+- Full native GPU acceleration is mandatory for playback/render paths where applicable.
+- If GPU is available, heavy processing should default to GPU.
+- CPU fallback is allowed only when GPU is unavailable/unsupported or explicitly disabled.
+
+Apple Silicon requirement:
+- Full support for Apple Silicon M1, M2, M3, and M4 families is mandatory.
+- On macOS, use Metal-native acceleration for supported workloads.

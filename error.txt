@@ -1,0 +1,37 @@
+art@art:~/NovaCompositor$ cd ui_qt && cmake -B build -G Ninja && ninja -C build
+./build/NovaCompositor
+-- The CXX compiler identification is GNU 13.3.0
+-- Detecting CXX compiler ABI info
+-- Detecting CXX compiler ABI info - done
+-- Check for working CXX compiler: /usr/bin/c++ - skipped
+-- Detecting CXX compile features
+-- Detecting CXX compile features - done
+-- Performing Test CMAKE_HAVE_LIBC_PTHREAD
+-- Performing Test CMAKE_HAVE_LIBC_PTHREAD - Success
+-- Found Threads: TRUE  
+-- Performing Test HAVE_STDATOMIC
+-- Performing Test HAVE_STDATOMIC - Success
+-- Found WrapAtomic: TRUE  
+-- Found OpenGL: /usr/lib/x86_64-linux-gnu/libOpenGL.so   
+-- Found WrapOpenGL: TRUE  
+-- Found XKB: /usr/lib/x86_64-linux-gnu/libxkbcommon.so (found suitable version "1.6.0", minimum required is "0.5.0") 
+-- Found WrapVulkanHeaders: /usr/include  
+Error copying file (if different) from "/home/art/NovaCompositor/ui_qt/qml/components/NovaButton.qml" to "/home/art/NovaCompositor/ui_qt/build/NovaCompositor/qml/components/NovaButton.qml".
+-- Configuring done (2.0s)
+CMake Error at /usr/lib/x86_64-linux-gnu/cmake/Qt6Qml/Qt6QmlMacros.cmake:1987 (target_sources):
+  Cannot find source file:
+
+    /home/art/NovaCompositor/ui_qt/qml/components/NovaButton.qml
+Call Stack (most recent call first):
+  /usr/lib/x86_64-linux-gnu/cmake/Qt6Qml/Qt6QmlMacros.cmake:611 (qt6_target_qml_sources)
+  /usr/lib/x86_64-linux-gnu/cmake/Qt6Qml/Qt6QmlMacros.cmake:670 (qt6_add_qml_module)
+  CMakeLists.txt:48 (qt_add_qml_module)
+
+
+-- Generating done (0.0s)
+CMake Generate step failed.  Build files cannot be regenerated correctly.
+bash: ./build/NovaCompositor: Это каталог
+art@art:~/NovaCompositor/ui_qt$ cd ui_qt && cmake -B build -G Ninja && ninja -C build
+./build/NovaCompositor
+bash: cd: ui_qt: Нет такого файла или каталога
+bash: ./build/NovaCompositor: Это каталог

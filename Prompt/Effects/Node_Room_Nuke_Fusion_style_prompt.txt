@@ -1,0 +1,216 @@
+Node Room Prompt: Full Non-Linear Node Compositing Workspace
+
+Role:
+You are a Principal Compositing Architect.
+Design and implement a separate full-featured node-based workspace/tab for our application.
+
+==================================================
+0) Mission
+==================================================
+Build an independent "Node Room" for users who prefer Nuke/Fusion-style non-linear compositing.
+This room must support full node graph workflows while staying integrated with project assets, timeline outputs, and render pipeline.
+
+==================================================
+1) Product intent
+==================================================
+The app should support two compositing paradigms:
+1. Layer/timeline workflow (AE-like)
+2. Node graph workflow (Nuke/Fusion-like)
+
+Node Room is not a small visualization of layer tree.
+It is a real production node editor with non-linear graph logic.
+
+==================================================
+2) Core requirements
+==================================================
+Must include:
+- Dedicated full-screen Node Room page/tab
+- Node graph canvas with pan/zoom, box select, reroute nodes, backdrops
+- Multi-input compositing nodes
+- Branching/merging and reusable graph patterns
+- Two independent preview monitors/viewers (A and B) with independent source selection
+- Per-monitor toggle: hide/show any monitor instantly to save workspace
+- Viewer nodes and A/B compare
+- Rulers and guides on each preview monitor
+- Real-time graph evaluation feedback
+- Full 3D viewer support integrated via Blender backend bridge (UI remains native)
+
+==================================================
+3) Node categories (MVP)
+==================================================
+1. IO Nodes
+- Read (media/project assets)
+- Write (output)
+- Sequence loader
+
+2. Color Nodes
+- Grade, curves, exposure, hue/sat, LUT (basic)
+
+3. Filter Nodes
+- blur, sharpen, edge, denoise (basic)
+
+4. Key/Matte Nodes
+- chroma key, luma key, despill, matte control
+
+5. Transform Nodes
+- transform, crop, corner pin, stabilize (basic)
+
+6. Merge Nodes
+- over/add/screen/multiply/alpha ops
+
+7. Utility Nodes
+- switch, dissolve, time offset, expression/logic node
+
+8. 3D/Camera bridge nodes (phase 2)
+- camera, projection, 3D merge bridge with 3D room outputs
+- Blender-backed 3D viewer bridge node for scene preview/interaction
+
+==================================================
+4) Graph model
+==================================================
+- Directed acyclic graph by default (with guarded feedback loops only where explicitly allowed)
+- Typed ports (image, matte, depth, vector, audio, metadata)
+- Node versioning and schema migration
+- Deterministic evaluation order via dependency solver
+
+Graph operations:
+- create/delete/connect/disconnect
+- duplicate/subgraph copy
+- collapse into group node
+- publish reusable macro node
+
+==================================================
+5) Integration with main project
+==================================================
+- Node Room reads assets from main project bin.
+- Node outputs can be inserted back into timeline as layers or rendered plates.
+- Timeline layers can be "sent to Node Room" as source inputs.
+- Round-trip metadata must be preserved.
+
+==================================================
+6) UX design
+==================================================
+Node Room layout:
+- Left: node library/search
+- Center: graph canvas
+- Right: inspector/properties
+- Bottom: error log + performance stats
+- Viewer panels: dual independent monitors (A/B), each with:
+  - ruler and guide overlays
+  - individual source routing
+  - independent visibility toggle (hide/show)
+
+Quality-of-life features:
+- fast hotkeys (connect, disable, bypass, solo)
+- sticky notes/backdrops for graph organization
+- bookmarks for large graphs
+- auto-layout option
+
+==================================================
+7) Performance and execution
+==================================================
+- GPU-first evaluation where applicable
+- CPU fallback for unsupported nodes
+- tile/ROI evaluation for interactive speed
+- partial re-evaluation on graph changes
+- async background render for heavy branches
+
+Non-blocking behavior:
+- Node edits should remain interactive
+- Viewer updates should prioritize visible branch
+
+==================================================
+8) Caching policy (for Node Room)
+==================================================
+- Smart node-level cache is allowed and recommended in Node Room.
+- Cache should be dependency-aware and invalidation-safe.
+- User can purge/freeze cache per node/branch.
+
+==================================================
+9) Compatibility bridge with AE-like layers
+==================================================
+- Provide conversion helpers: Layer Stack -> Node Graph (best effort)
+- Provide Node Graph -> Layer Output (rendered/linked result)
+- Show compatibility report for unmapped constructs
+
+==================================================
+10) Expressions and scripting in nodes
+==================================================
+- Support expression fields on node parameters (sandboxed)
+- Reuse global expression engine semantics where possible
+- Expose node-context variables safely
+
+==================================================
+11) Diagnostics and debugging
+==================================================
+Must include:
+- per-node error badges
+- failed connection/type mismatch hints
+- render time per node
+- memory/VRAM usage panel
+- dependency trace inspector
+
+==================================================
+12) Team and pipeline features (phase 2+)
+==================================================
+- versioned shared macros
+- graph diff/merge basics
+- publish graph templates to pack browser
+
+==================================================
+13) MVP scope
+==================================================
+Include:
+- Dedicated full-screen Node Room
+- core node categories (IO/color/filter/key/merge/transform)
+- dual independent preview monitors (A/B) with ruler/guides and hide/show control
+- Blender-integrated 3D viewer support (backend bridge, native UI)
+- viewer and inspector
+- project asset integration
+- render output back to timeline
+- node diagnostics and basic performance metrics
+
+Exclude initially:
+- full deep compositing stack
+- advanced 3D scene graph inside node room
+- distributed farm render orchestration
+
+==================================================
+14) Definition of Done
+==================================================
+- User can build and render practical node-based comps end-to-end.
+- Graph editing is stable and responsive on production-like scenes.
+- User can work with two independent monitors and hide/show either monitor at any time.
+- Both preview monitors provide ruler and guide overlays.
+- User can use integrated Blender-backed 3D viewer workflows inside Node Room.
+- Outputs can be used directly in timeline workflow.
+- Node Room serves Nuke/Fusion-style users without forcing layer-only workflow.
+
+==================================================
+15) Execution output format
+==================================================
+When asked to "start", provide:
+1. Node architecture blueprint v0.1
+2. Typed port and node schema spec
+3. MVP node list with evaluation rules
+4. UI wireframe checklist for Node Room
+5. Performance budget and cache policy
+6. Test matrix and phased roadmap
+
+==================================================
+MANDATORY UI INTEGRATION REQUIREMENT
+==================================================
+- Node Room must be fully integrated inside our native application UI.
+- All graph editing, previewing, diagnostics, and output actions must happen in-app.
+- External node applications must not be required for normal workflow.
+
+==================================================
+NATIVE GPU ACCELERATION REQUIREMENT
+==================================================
+- Full native GPU acceleration is mandatory for node processing where applicable.
+- If GPU is available, heavy node evaluation should default to GPU.
+- CPU fallback is allowed only when GPU is unavailable/unsupported or explicitly disabled.
+
+Apple Silicon requirement:
+- Full support for Apple Silicon M1, M2, M3, and M4 families is mandatory.
+- On macOS, use Metal-native acceleration paths for supported node workloads.

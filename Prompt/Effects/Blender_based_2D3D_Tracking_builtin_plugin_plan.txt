@@ -1,0 +1,234 @@
+Blender-based 2D/3D Tracking Built-in Plugin Plan
+
+Purpose:
+- Define a built-in tracking module that uses Blender-grade 2D/3D tracking capabilities,
+  but is fully presented and operated inside our program interface.
+
+Critical product rule:
+- All plugins described in this project must work directly in our application UI.
+- External engines (including Blender) are allowed only as backend workers.
+- User workflow must remain native to our interface (timeline, viewer, panels, keyframes).
+- System-wide Blender installation must not be required for this plugin.
+- Blender-based tracking runtime must be bundled and managed inside our application.
+
+==================================================
+1) Product goal
+==================================================
+Create an integrated tracking module for:
+1. 2D point tracking
+2. Planar tracking (phase 2)
+3. Full camera/object 3D solve
+4. Tracking-driven compositing controls
+
+User promise:
+- "Production tracking without leaving the compositor interface."
+
+==================================================
+2) UX concept (native to our app)
+==================================================
+Main panels:
+1. Track Setup
+- Track type: 2D / 3D Camera / 3D Object
+- Clip source and frame range
+- Lens preset / focal settings
+
+2. Feature Tracking
+- Add/Delete track points
+- Auto feature detect
+- Track forward/backward
+- Track quality overlay
+
+3. Solve
+- Solve camera/object
+- Error metrics (RMS / outliers)
+- Refine solve
+
+4. Scene Apply
+- Create camera from solve
+- Create nulls/solids from markers
+- Ground plane/alignment tools
+
+5. Diagnostics
+- Track confidence heatmap
+- Drift/wobble indicators
+- Reprojection error graph
+
+Workflow:
+1. User loads clip and sets tracking range
+2. Creates or auto-detects feature points
+3. Runs tracking pass
+4. Solves camera/object
+5. Applies solve to scene layers/nulls/camera
+6. Fine-tunes and locks result
+
+==================================================
+3) Architecture
+==================================================
+Frontend (host app):
+- All interaction and visualization in our own panels/viewer
+- Keyframes and solve artifacts stored in our project format
+
+Backend:
+- Tracking engine worker based on Blender-compatible tracking logic
+- Prefer external worker process for isolation and stability
+- Worker runtime is bundled/managed by host app (private runtime), not dependent on system Blender install
+
+Bridge components:
+1. Tracking Job Orchestrator
+2. Track Data Translator
+3. Solve Result Mapper
+4. Quality Diagnostics Adapter
+
+Data flow:
+Host UI -> Tracking job config -> Backend worker -> Track/Solve results -> Host timeline/scene
+
+Dedicated workspace requirement:
+- Plugin must open in its own dedicated full-screen in-app room/page ("Tracking Room") for focused solving and diagnostics.
+- Tracking Room includes:
+  - large tracking viewport,
+  - track controls and solve controls,
+  - diagnostics graphs/errors panel,
+  - apply-to-scene tools.
+
+==================================================
+4) 2D tracking spec (MVP)
+==================================================
+Capabilities:
+- Single/multi-point tracking
+- Forward/backward tracking
+- Occlusion handling and reacquire
+- Subpixel refinement
+- Illumination robustness controls
+
+Outputs:
+- Transform tracks (position/scale/rotation where derivable)
+- Null/object attachment tracks
+- Confidence score per frame
+
+==================================================
+5) 3D tracking spec (MVP+)
+==================================================
+Capabilities:
+- Camera solve from moving footage
+- Object solve (when camera is known or jointly estimated)
+- Lens distortion estimation (basic -> advanced)
+
+Outputs:
+- Solved virtual camera in composition
+- 3D null markers from track points
+- Ground plane alignment and scene scale tools
+
+==================================================
+6) Apply-to-compositor integration
+==================================================
+Generated items in timeline:
+- Solved camera layer
+- Track nulls / helper solids
+- Tracking-driven transform constraints
+
+Compositing helpers:
+- Attach layer to track
+- Corner pin assist (phase 2)
+- Stabilize from track
+
+==================================================
+7) Quality and reliability
+==================================================
+Quality metrics exposed to artist:
+- Reprojection error (overall and per track)
+- Track lifetime
+- Confidence and drift indicators
+
+Reliability rules:
+- Backend crash cannot crash host app
+- Partial results can be recovered
+- Re-run with changed params is non-destructive
+
+==================================================
+8) Performance strategy
+==================================================
+- Async jobs, non-blocking UI
+- Frame chunk processing for long clips
+- Caching of feature detection and intermediate solve states
+- Draft/Standard/Final tracking quality profiles
+
+==================================================
+9) Compatibility and scope
+==================================================
+Input formats:
+- Standard video/image sequence formats via FFmpeg/media pipeline
+
+MVP scope:
+- 2D feature tracking
+- Basic camera solve
+- Apply results to camera/nulls
+- Diagnostics panel and error metrics
+- Dedicated full-screen Tracking Room
+- Bundled managed tracking runtime (no system Blender requirement)
+
+Phase 2:
+- Planar tracking
+- Better lens models
+- Corner pin and advanced stabilization tools
+
+Phase 3:
+- Robust object solve workflows
+- Improved low-texture/rolling shutter handling
+
+==================================================
+10) Project data model
+==================================================
+Store in project schema:
+- Track set definitions
+- Per-frame tracked points and confidence
+- Solve parameters and results
+- Apply mappings (camera/null bindings)
+- Diagnostics snapshots
+
+==================================================
+11) Legal/compliance
+==================================================
+- Implementation must be clean-room and original.
+- Blender is used as backend technology reference/worker path, not copied UI/branding.
+- User experience and interface are fully native to our product.
+
+==================================================
+12) Definition of Done
+==================================================
+- Artist can complete 2D tracking and basic 3D camera solve entirely inside our app UI.
+- Solve results can drive camera/nulls in timeline.
+- Diagnostics help identify and fix bad tracks.
+- Plugin works without requiring Blender installed in the operating system.
+- Tracking Room provides full-screen focused workflow for track/solve/apply.
+- Workflow is stable on Linux/Windows/macOS baseline matrix.
+
+==================================================
+13) Immediate next steps
+==================================================
+1. Define tracking job protocol v0.1 (input/output JSON schema).
+2. Build MVP track panel and overlay tools in viewer.
+3. Implement async tracking worker integration.
+4. Add solve result mapper to camera/null layer generation.
+5. Add regression set with known tracking plates and expected error thresholds.
+
+
+==================================================
+MANDATORY UI INTEGRATION REQUIREMENT
+==================================================
+- This plugin must operate strictly inside our program interface.
+- All user-facing controls, previews, settings, timeline actions, and final outputs must be handled in our native UI.
+- External tools/runtimes (including Blender/ComfyUI or similar) are backend workers only and must not replace or become the primary user interface.
+- The user workflow must remain fully native to our application from start to finish.
+
+==================================================
+NATIVE GPU ACCELERATION REQUIREMENT
+==================================================
+- Full native GPU acceleration is mandatory.
+- If a discrete or integrated GPU is available, heavy compute/render/inference workloads must be delegated to GPU by default.
+- CPU fallback is allowed only when GPU is unavailable, unsupported, or explicitly disabled by user policy.
+- Runtime must include GPU capability detection and automatic backend selection for best performance/stability.
+
+Apple Silicon requirement:
+- Full support for Apple Silicon M1, M2, M3, and M4 families is mandatory.
+- On macOS, GPU paths must use Metal-native acceleration for supported workloads.
+- Feature parity and reliability targets on Apple Silicon must match other primary platforms for core plugin workflows.

@@ -1,0 +1,208 @@
+Motion Packs Browser and MotionBro Library Compatibility Plan
+
+Purpose:
+- Define a built-in browser for prepared effects, ready-to-use footage, sounds, and spline-based animation presets.
+- Deliver a workflow similar in spirit to Motion Bro style content browsing, while keeping our implementation native and original.
+- Provide compatibility pathway for Motion Bro libraries where technically and legally possible.
+
+Working name:
+- Motion Packs Browser
+
+==================================================
+1) Product goal
+==================================================
+The plugin should allow users to:
+- browse categorized effect presets quickly,
+- preview and apply ready footage assets,
+- use bundled and external sound libraries,
+- apply spline animation presets to selected layers/properties,
+- manage local/remote content packs inside our app.
+
+User promise:
+- "Find, preview, and apply production-ready assets in seconds."
+
+==================================================
+2) Core UX model
+==================================================
+Main sections:
+1. Effects
+- Transitions, reveals, titles, distortion/color looks
+
+2. Footage
+- overlays, particles, light leaks, glitches, bokeh, backgrounds
+
+3. Audio
+- hits, swishes, risers, ambient loops, UI sounds
+
+4. Spline Animations
+- easing curves, motion archetypes, bounce/overshoot/punch presets
+
+5. Packs
+- installed packs, updates, dependencies, import/export
+
+6. Favorites/History
+- recently used assets and saved custom collections
+
+==================================================
+3) Dedicated room/page
+==================================================
+- Plugin opens in its own dedicated full-screen in-app room/page ("Motion Packs Room").
+- Motion Packs Room includes:
+  - large preview area,
+  - left category tree,
+  - search and filters,
+  - right-side apply/config panel,
+  - pack manager and diagnostics.
+- Enter/exit must preserve timeline context and non-destructive state.
+
+==================================================
+4) Data and package format
+==================================================
+Pack content types:
+- effect preset definitions
+- media assets (video/image/audio)
+- spline profile presets
+- metadata (thumbnails, tags, author, version, license)
+
+Recommended pack structure:
+- manifest.json (required)
+- assets/
+- presets/
+- splines/
+- preview/
+- license/
+
+Manifest fields (minimum):
+- pack_id, name, version
+- content_types
+- compatibility_version
+- dependencies
+- license_info
+
+==================================================
+5) Motion Bro compatibility strategy
+==================================================
+Goal:
+- Support import/use of Motion Bro libraries in our browser workflow when feasible.
+
+Compatibility mode:
+1. Native pack mode
+- Our own pack format (first-class support)
+
+2. MotionBro-compat mode
+- Import/conversion layer maps supported library items into native pack schema
+- Unsupported elements are reported clearly with fallback suggestions
+
+Policy:
+- No copying of third-party proprietary code.
+- Compatibility is implemented through original parser/mapping logic.
+- Respect third-party licenses and user-provided content rights.
+
+==================================================
+6) Apply pipeline
+==================================================
+- User selects target layer(s) or composition range
+- User previews asset/preset
+- User applies with configurable options (duration, blend, intensity, alignment)
+- Plugin creates non-destructive layer/effect instances in timeline
+
+For spline presets:
+- Apply to selected keyframe tracks
+- Map curve profile to value/speed graph
+- Optional amplitude/time scale adapt controls
+
+==================================================
+7) Search and discovery
+==================================================
+- Full-text search by name/tags/use-case
+- Filter by type, duration, style, fps, aspect ratio, language
+- Smart recommendations (based on recent usage)
+- Collections: Favorites, Team Packs, Project Packs
+
+==================================================
+8) Performance and caching
+==================================================
+- Thumbnail cache and proxy previews
+- Background indexing of packs
+- Lazy loading for large libraries
+- Async apply/preview jobs (non-blocking UI)
+- Media decode/preview path integrated with FFmpeg pipeline
+
+==================================================
+9) Integration with project and timeline
+==================================================
+- Applied items are tracked as project assets with stable IDs
+- Preset origin and version are stored in metadata
+- Re-link/update flow when pack version changes
+- Safe fallback if a pack is missing
+
+==================================================
+10) Diagnostics and validation
+==================================================
+- Pack validator checks manifest, file integrity, compatibility version
+- Conversion report for MotionBro-compat imports
+- Warnings for unsupported elements
+- One-click "show missing dependencies"
+
+==================================================
+11) Security and governance
+==================================================
+- Sandbox pack extraction directory
+- Signed pack support (roadmap)
+- Block unsafe scripts by default
+- Explicit trust mode for advanced user packs
+
+==================================================
+12) MVP scope
+==================================================
+Include:
+- Full-screen Motion Packs Room
+- Effects/Footage/Audio/Spline tabs
+- Native pack install/uninstall/update
+- Search, filters, favorites, history
+- Non-destructive apply to timeline
+- MotionBro-compat import (initial subset) + conversion report
+
+Exclude initially:
+- online marketplace with payment
+- collaborative team sync service
+- auto-cloud backup of all packs
+
+==================================================
+13) Acceptance criteria
+==================================================
+- User can browse and apply effects/footage/audio/spline presets inside host UI only.
+- Plugin remains responsive with large libraries.
+- MotionBro-compat import works for defined supported subset.
+- Unsupported imported items are clearly reported with no crashes.
+- Applied content remains stable after project reload.
+
+==================================================
+14) Immediate next steps
+==================================================
+1. Define native pack schema v0.1 and manifest spec.
+2. Implement full-screen Motion Packs Room shell UI.
+3. Build pack indexer/search engine + thumbnail pipeline.
+4. Implement apply engine for effects/media/splines.
+5. Build MotionBro-compat parser + conversion report.
+6. Validate legal/license compliance boundaries and user messaging.
+
+==================================================
+MANDATORY UI INTEGRATION REQUIREMENT
+==================================================
+- This plugin must operate strictly inside our program interface.
+- All user-facing controls, previews, settings, timeline actions, and final outputs must be handled in our native UI.
+- External tools/runtimes are backend workers only and must not replace or become the primary user interface.
+- The user workflow must remain fully native to our application from start to finish.
+
+==================================================
+NATIVE GPU ACCELERATION REQUIREMENT
+==================================================
+- Full native GPU acceleration is mandatory.
+- If a discrete or integrated GPU is available, heavy preview/render workloads must be delegated to GPU by default.
+- CPU fallback is allowed only when GPU is unavailable, unsupported, or explicitly disabled by user policy.
+
+Apple Silicon requirement:
+- Full support for Apple Silicon M1, M2, M3, and M4 families is mandatory.
+- On macOS, GPU paths must use Metal-native acceleration for supported workloads.
+

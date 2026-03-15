@@ -1,6 +1,8 @@
+use engine_api::types::{
+    ColorProfile, FrameRate, Interpolation, PropertyValue, RationalTime, Resolution,
+};
 use serde::{Deserialize, Serialize};
 use uuid::Uuid;
-use engine_api::types::{Resolution, FrameRate, ColorProfile, RationalTime, PropertyValue, Interpolation};
 
 use crate::asset::AssetKind;
 
@@ -21,10 +23,17 @@ pub struct Composition {
     pub background_color: [f64; 4],
 }
 
-fn default_bg_color() -> [f64; 4] { [0.0, 0.0, 0.0, 1.0] }
+fn default_bg_color() -> [f64; 4] {
+    [0.0, 0.0, 0.0, 1.0]
+}
 
 impl Composition {
-    pub fn new(name: impl Into<String>, resolution: Resolution, frame_rate: FrameRate, duration: RationalTime) -> Self {
+    pub fn new(
+        name: impl Into<String>,
+        resolution: Resolution,
+        frame_rate: FrameRate,
+        duration: RationalTime,
+    ) -> Self {
         Self {
             id: Uuid::new_v4(),
             name: name.into(),
@@ -93,30 +102,70 @@ pub struct Layer {
     pub track_matte: TrackMatteMode,
 }
 
-fn default_true() -> bool { true }
+fn default_true() -> bool {
+    true
+}
 
 impl Layer {
-    pub fn new_solid(name: impl Into<String>, color: [f64; 4], in_point: RationalTime, out_point: RationalTime) -> Self {
+    pub fn new_solid(
+        name: impl Into<String>,
+        color: [f64; 4],
+        in_point: RationalTime,
+        out_point: RationalTime,
+    ) -> Self {
         Self::base(name, LayerKind::Solid { color }, in_point, out_point)
     }
 
-    pub fn new_null(name: impl Into<String>, in_point: RationalTime, out_point: RationalTime) -> Self {
+    pub fn new_null(
+        name: impl Into<String>,
+        in_point: RationalTime,
+        out_point: RationalTime,
+    ) -> Self {
         Self::base(name, LayerKind::Null, in_point, out_point)
     }
 
-    pub fn new_asset(name: impl Into<String>, asset_id: Uuid, asset_kind: AssetKind, in_point: RationalTime, out_point: RationalTime) -> Self {
-        Self::base(name, LayerKind::Asset { asset_id, asset_kind }, in_point, out_point)
+    pub fn new_asset(
+        name: impl Into<String>,
+        asset_id: Uuid,
+        asset_kind: AssetKind,
+        in_point: RationalTime,
+        out_point: RationalTime,
+    ) -> Self {
+        Self::base(
+            name,
+            LayerKind::Asset {
+                asset_id,
+                asset_kind,
+            },
+            in_point,
+            out_point,
+        )
     }
 
-    pub fn new_text(name: impl Into<String>, content: impl Into<String>, in_point: RationalTime, out_point: RationalTime) -> Self {
-        Self::base(name, LayerKind::Text {
-            content: content.into(),
-            font_family: "Inter".into(),
-            font_size: 48.0,
-        }, in_point, out_point)
+    pub fn new_text(
+        name: impl Into<String>,
+        content: impl Into<String>,
+        in_point: RationalTime,
+        out_point: RationalTime,
+    ) -> Self {
+        Self::base(
+            name,
+            LayerKind::Text {
+                content: content.into(),
+                font_family: "Inter".into(),
+                font_size: 48.0,
+            },
+            in_point,
+            out_point,
+        )
     }
 
-    fn base(name: impl Into<String>, kind: LayerKind, in_point: RationalTime, out_point: RationalTime) -> Self {
+    fn base(
+        name: impl Into<String>,
+        kind: LayerKind,
+        in_point: RationalTime,
+        out_point: RationalTime,
+    ) -> Self {
         Self {
             id: Uuid::new_v4(),
             name: name.into(),
@@ -143,19 +192,44 @@ impl Layer {
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 #[serde(tag = "type")]
 pub enum LayerKind {
-    Asset { asset_id: Uuid, asset_kind: AssetKind },
-    Solid { color: [f64; 4] },
-    Text { content: String, font_family: String, font_size: f64 },
+    Asset {
+        asset_id: Uuid,
+        asset_kind: AssetKind,
+    },
+    Solid {
+        color: [f64; 4],
+    },
+    Text {
+        content: String,
+        font_family: String,
+        font_size: f64,
+    },
     Adjustment,
     Null,
-    Shape { shapes: Vec<serde_json::Value> }, // Detailed shape data deferred to Phase 1 Q3
-    Camera { fov_degrees: f64 },
-    Light { light_type: LightType, color: [f64; 3], intensity: f64 },
-    PreComp { composition_id: Uuid },
+    Shape {
+        shapes: Vec<serde_json::Value>,
+    }, // Detailed shape data deferred to Phase 1 Q3
+    Camera {
+        fov_degrees: f64,
+    },
+    Light {
+        light_type: LightType,
+        color: [f64; 3],
+        intensity: f64,
+    },
+    PreComp {
+        composition_id: Uuid,
+    },
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize, Default)]
-pub enum LightType { #[default] Point, Spot, Ambient, Parallel }
+pub enum LightType {
+    #[default]
+    Point,
+    Spot,
+    Ambient,
+    Parallel,
+}
 
 /// Animatable transform for a layer.
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
@@ -192,10 +266,15 @@ pub struct KeyframeChannel {
 
 impl KeyframeChannel {
     pub fn from_value(v: PropertyValue) -> Self {
-        Self { static_value: Some(v), keyframes: Vec::new() }
+        Self {
+            static_value: Some(v),
+            keyframes: Vec::new(),
+        }
     }
 
-    pub fn is_animated(&self) -> bool { !self.keyframes.is_empty() }
+    pub fn is_animated(&self) -> bool {
+        !self.keyframes.is_empty()
+    }
 
     /// Insert or update a keyframe at the exact time. Maintains chronological sort.
     pub fn insert_keyframe(&mut self, kf: Keyframe) {
@@ -269,7 +348,8 @@ pub struct EffectParam {
 /// Layer blend modes.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize, Default)]
 pub enum BlendMode {
-    #[default] Normal,
+    #[default]
+    Normal,
     Add,
     Screen,
     Multiply,
@@ -294,7 +374,8 @@ pub enum BlendMode {
 /// Track matte mode.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize, Default)]
 pub enum TrackMatteMode {
-    #[default] None,
+    #[default]
+    None,
     AlphaMatte,
     AlphaInvertedMatte,
     LumaMatte,

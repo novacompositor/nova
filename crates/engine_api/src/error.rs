@@ -1,5 +1,5 @@
-use std::fmt;
 use serde::{Deserialize, Serialize};
+use std::fmt;
 
 /// Structured engine error returned by command/query processing.
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize, thiserror::Error)]
@@ -45,29 +45,40 @@ impl EngineError {
     }
 
     pub fn project_not_found(path: &str) -> Self {
-        Self::new(EngineErrorCode::ProjectNotFound, format!("Project not found: {}", path))
-            .with_context(path)
+        Self::new(
+            EngineErrorCode::ProjectNotFound,
+            format!("Project not found: {}", path),
+        )
+        .with_context(path)
     }
 
     pub fn codec_unsupported(codec: &str) -> Self {
-        Self::new(EngineErrorCode::CodecUnsupported, format!("Codec not supported: {}", codec))
-            .with_context(codec)
+        Self::new(
+            EngineErrorCode::CodecUnsupported,
+            format!("Codec not supported: {}", codec),
+        )
+        .with_context(codec)
     }
 
     pub fn asset_offline(path: &str) -> Self {
-        Self::new(EngineErrorCode::AssetOffline, format!("Asset is offline: {}", path))
-            .with_context(path)
+        Self::new(
+            EngineErrorCode::AssetOffline,
+            format!("Asset is offline: {}", path),
+        )
+        .with_context(path)
     }
 
     pub fn gpu_error(reason: &str) -> Self {
-        Self::new(EngineErrorCode::GpuError, format!("GPU error: {}", reason))
-            .with_context(reason)
+        Self::new(EngineErrorCode::GpuError, format!("GPU error: {}", reason)).with_context(reason)
     }
 
     pub fn schema_version_mismatch(got: u32, expected: u32) -> Self {
         Self::new(
             EngineErrorCode::SchemaVersionMismatch,
-            format!("Schema version mismatch: got {}, expected {}", got, expected),
+            format!(
+                "Schema version mismatch: got {}, expected {}",
+                got, expected
+            ),
         )
     }
 }

@@ -4,7 +4,9 @@
 pub struct ExpressionRuntime;
 
 impl ExpressionRuntime {
-    pub fn new() -> Self { Self }
+    pub fn new() -> Self {
+        Self
+    }
     pub fn eval(&self, _expr: &str) -> Result<f64, String> {
         Err("Expression engine not yet implemented".to_string())
     }

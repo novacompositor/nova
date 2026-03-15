@@ -1,0 +1,279 @@
+2D Rigging & Animation Built-in Plugin Plan (Duik-like Workflow)
+
+Purpose:
+- Define a built-in 2D rigging and character animation plugin for our compositor.
+- Provide a workflow similar in spirit to popular 2D rigging toolsets used in motion design, while keeping implementation original and native to our app.
+
+Working name:
+- Motion Rig 2D
+
+==================================================
+1) Product goal
+==================================================
+Enable users to:
+- build 2D character rigs quickly,
+- animate with IK/FK controls,
+- create walk cycles and reusable animation systems,
+- use constraints and automation to speed production.
+
+User promise:
+- "Fast pro-level 2D rigging and animation directly in our timeline."
+
+==================================================
+2) Core feature set
+==================================================
+MVP:
+1. Bones/Controllers
+- Create bones and null-based controllers
+- Parent chains and hierarchy editor
+
+2. IK/FK
+- 2-bone IK (arms/legs)
+- FK rotation chains
+- IK/FK blend switch
+
+3. Constraints
+- Parent/orient/position constraints
+- Aim/Look-at constraint
+- Distance and scale constraints
+
+4. Automation helpers
+- Auto-rig templates for biped/quadruped basics
+- Auto-controller naming and color coding
+- Mirror rig tools (left/right)
+
+5. Animation tools
+- Pose library (save/apply poses)
+- Breakdown and tween helpers
+- Cycle/loop tools (walk, idle)
+
+6. Deformation basics
+- Puppet-style point deformation (phase 1 basic)
+- Mesh/deform bind roadmap (phase 2)
+
+==================================================
+3) UX and panel design
+==================================================
+Panels:
+1. Rig Builder
+- Add limb, spine, neck, head, hand, foot modules
+
+2. Controllers
+- Shape, size, color, lock channels
+
+3. IK/FK
+- Build IK chains
+- Pole vector controls
+- IK/FK snap and blend
+
+4. Constraints
+- Add/edit/disable constraints
+- Visual relationship graph
+
+5. Animation Toolkit
+- Pose library
+- Mirror pose
+- Auto overlap/secondary motion helpers
+- Universal action presets (walk/run/gait variants/sit/stand/wave/idle transitions)
+
+6. Diagnostics
+- Broken links
+- Cyclic dependency warnings
+- Rig health checks
+
+Workflow:
+1. Import layered character
+2. Auto-create or manual rig
+3. Generate controllers and IK/FK
+4. Animate poses in timeline
+5. Refine arcs, overlap, cycles
+
+Dedicated workspace requirement:
+- Plugin must open in its own full-screen in-app room/page ("Rigging & Animation Room"), similar to Keying Room behavior.
+- The room includes:
+  - large character viewport,
+  - rig hierarchy/controls panel,
+  - preset action browser,
+  - timeline tools for pose/cycle editing.
+
+==================================================
+4) Architecture
+==================================================
+Plugin type:
+- Built-in module in host app effect/animation system
+
+Core subsystems:
+1. Rig Data Model
+- Bones, controllers, constraints, deformation anchors
+
+2. Solver Engine
+- IK solver, constraints solver, evaluation order
+
+3. Animation Adapter
+- Keyframe integration, interpolation and graph editor mapping
+
+4. Preset/Template Manager
+- rig templates, controller presets, pose assets
+
+5. Validation Engine
+- detects invalid hierarchy/cycles/missing targets
+
+==================================================
+5) Data model (high-level)
+==================================================
+Entities:
+- Rig
+- Bone
+- Controller
+- Constraint
+- IKChain
+- Pose
+
+Minimum fields:
+- stable IDs
+- transform channels
+- parent references
+- enabled/locked states
+- mirror pairing metadata
+
+Persistence:
+- fully stored in project schema
+- versioned migration support
+
+==================================================
+6) Solver behavior
+==================================================
+Evaluation order:
+1. Read keyed controller transforms
+2. Solve constraints
+3. Solve IK chains
+4. Apply deformation links
+5. Emit final transforms to layers
+
+Rules:
+- Deterministic solve
+- Cycle detection and graceful fallback
+- Stable results across preview/final render
+
+==================================================
+7) Timeline integration
+==================================================
+- All controller channels keyframe-able
+- Support stepped/blocking and spline animation
+- Graph editor visibility by rig group
+- Auto-key mode and smart channel filtering
+
+Animation utilities:
+- Select affected keys by controller
+- Bake IK to FK / FK to IK
+- Create cycle from selected range
+
+==================================================
+8) Performance strategy
+==================================================
+- Incremental rig evaluation per changed controllers
+- Caching solved states near playhead
+- Non-blocking UI updates
+- Quality profiles for heavy scenes (Draft/Standard/Final)
+
+==================================================
+9) MVP scope
+==================================================
+Include:
+- Bone/controller creation
+- 2-bone IK + FK chains
+- Core constraints
+- Pose library v1
+- Full-screen Rigging & Animation Room
+- Universal action preset system v1 (walk/run/sit/stand/wave/idle)
+- Basic mirror tools
+- Timeline integration and graph editor support
+
+Exclude initially:
+- Advanced mesh skinning
+- Full physics simulation
+- Complex auto-lipsync systems
+
+==================================================
+10) Testing strategy
+==================================================
+Tests:
+1. Unit tests
+- IK math
+- constraint solver logic
+
+2. Integration tests
+- rig creation -> animation -> playback
+
+3. Regression tests
+- known rig templates and expected transform outputs
+
+4. Performance tests
+- many-character timeline stress scenes
+
+Acceptance quality:
+- stable solve, no pops on scrub
+- predictable IK/FK switching
+- reliable mirror and pose recall
+
+==================================================
+11) Legal/compliance
+==================================================
+- Implement rigging system from scratch (clean-room).
+- No copying third-party plugin code/assets.
+- Functional workflow parity is allowed; direct cloning of implementation is not.
+
+==================================================
+12) Definition of Done
+==================================================
+- User can rig a 2D character and animate a basic walk cycle in-app.
+- IK/FK and constraints are stable in production-like scenes.
+- Pose library and mirror tools save significant animation time.
+- Plugin runs in dedicated full-screen Rigging & Animation Room with non-destructive return to main timeline.
+- Universal action presets can be applied to different rigs through retarget/adaptation rules.
+- All major operations are reproducible after project reload.
+
+==================================================
+13) Implementation roadmap
+==================================================
+Phase 1:
+- Rig data model + controller UI + basic IK/FK
+
+Phase 2:
+- Constraint stack improvements + pose system + mirror tools
+
+Phase 3:
+- Advanced deformation and automation extensions
+
+==================================================
+14) Immediate next steps
+==================================================
+1. Define rig schema v0.1 and migration hooks.
+2. Implement 2-bone IK solver and core constraints.
+3. Build Rig Builder panel and controller visuals.
+4. Add full-screen Rigging & Animation Room and preset browser.
+5. Implement universal action preset retarget layer for different rig proportions.
+6. Add pose library and mirror skeleton tools.
+7. Validate with 3 reference character rigs + preset transfer tests.
+
+==================================================
+MANDATORY UI INTEGRATION REQUIREMENT
+==================================================
+- This plugin must operate strictly inside our program interface.
+- All user-facing controls, previews, rig editing, keyframing, and outputs must be handled in our native UI.
+- External tools/runtimes can be used only as backend workers and must not replace or become the primary user interface.
+- The full rigging and animation workflow must remain inside our application from start to finish.
+
+
+==================================================
+NATIVE GPU ACCELERATION REQUIREMENT
+==================================================
+- Full native GPU acceleration is mandatory.
+- If a discrete or integrated GPU is available, heavy compute/render/inference workloads must be delegated to GPU by default.
+- CPU fallback is allowed only when GPU is unavailable, unsupported, or explicitly disabled by user policy.
+- Runtime must include GPU capability detection and automatic backend selection for best performance/stability.
+
+Apple Silicon requirement:
+- Full support for Apple Silicon M1, M2, M3, and M4 families is mandatory.
+- On macOS, GPU paths must use Metal-native acceleration for supported workloads.
+- Feature parity and reliability targets on Apple Silicon must match other primary platforms for core plugin workflows.

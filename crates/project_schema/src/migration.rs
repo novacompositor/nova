@@ -1,5 +1,5 @@
-use crate::schema::{NovaProject, PROJECT_SCHEMA_VERSION};
 use crate::io::IoError;
+use crate::schema::{NovaProject, PROJECT_SCHEMA_VERSION};
 
 /// Migration runner: upgrades a project from its current schema version
 /// to `PROJECT_SCHEMA_VERSION` by running a chain of migrators.

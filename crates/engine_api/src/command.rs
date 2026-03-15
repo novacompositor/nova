@@ -1,6 +1,6 @@
+use crate::types::*;
 use serde::{Deserialize, Serialize};
 use uuid::Uuid;
-use crate::types::*;
 
 /// All commands that mutate engine state.
 /// The UI dispatches commands; the engine processes them and emits Events.
@@ -8,7 +8,6 @@ use crate::types::*;
 #[serde(tag = "type", content = "payload")]
 pub enum EngineCommand {
     // ---- Project lifecycle ----
-
     /// Create a new empty project with the given settings.
     CreateProject {
         name: String,
@@ -35,7 +34,6 @@ pub enum EngineCommand {
     CloseProject,
 
     // ---- Composition management ----
-
     /// Add a new composition to the project.
     AddComposition {
         name: String,
@@ -95,7 +93,6 @@ pub enum EngineCommand {
     },
 
     // ---- Layer management ----
-
     /// Add a layer to a composition.
     AddLayer {
         composition_id: CompositionId,
@@ -134,7 +131,6 @@ pub enum EngineCommand {
     },
 
     // ---- Property / Keyframe ----
-
     /// Set a property value at the given time (creates keyframe if property is animated).
     SetPropertyValue {
         composition_id: CompositionId,
@@ -171,7 +167,6 @@ pub enum EngineCommand {
     },
 
     // ---- Media / Assets ----
-
     /// Import a media file into the project's asset pool.
     ImportAsset {
         path: String,
@@ -202,7 +197,6 @@ pub enum EngineCommand {
     },
 
     // ---- Playback ----
-
     /// Start playback from the current playhead position.
     StartPlayback {
         composition_id: CompositionId,
@@ -218,7 +212,6 @@ pub enum EngineCommand {
     },
 
     // ---- Render queue ----
-
     /// Add a render job to the queue.
     QueueRenderJob {
         composition_id: CompositionId,
@@ -236,7 +229,6 @@ pub enum EngineCommand {
     },
 
     // ---- Effects ----
-
     /// Add an effect to a layer.
     AddEffect {
         composition_id: CompositionId,

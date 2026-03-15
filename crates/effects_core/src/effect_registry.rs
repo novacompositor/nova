@@ -6,7 +6,9 @@ pub struct EffectRegistry {
 }
 
 impl EffectRegistry {
-    pub fn new() -> Self { Self::default() }
+    pub fn new() -> Self {
+        Self::default()
+    }
 
     pub fn register(&mut self, effect_type: impl Into<String>) {
         self.types.push(effect_type.into());

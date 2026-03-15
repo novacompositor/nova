@@ -1,5 +1,5 @@
-use serde::{Deserialize, Serialize};
 use crate::types::*;
+use serde::{Deserialize, Serialize};
 
 /// Queries are read-only snapshot requests from the UI to the engine.
 /// They never mutate state.
@@ -10,9 +10,7 @@ pub enum EngineQuery {
     GetProjectTree,
 
     /// Get the full timeline view for a composition.
-    GetTimelineView {
-        composition_id: CompositionId,
-    },
+    GetTimelineView { composition_id: CompositionId },
 
     /// Get all properties and their current values for a layer at a given time.
     GetLayerProperties {
@@ -35,9 +33,7 @@ pub enum EngineQuery {
     GetRenderQueue,
 
     /// Get info about a specific asset.
-    GetAssetInfo {
-        asset_id: AssetId,
-    },
+    GetAssetInfo { asset_id: AssetId },
 
     /// Get engine diagnostics (GPU info, backend, perf counters).
     GetDiagnostics,

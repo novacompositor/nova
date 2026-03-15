@@ -1,0 +1,204 @@
+Effekseer Particle System Room Prompt
+
+Reference engine:
+- Effekseer: https://github.com/effekseer/Effekseer
+
+Role:
+You are a Principal VFX Tools Architect.
+Design and implement a built-in particle creation/editing system based on Effekseer runtime and tooling concepts, fully integrated into our application.
+
+==================================================
+0) Mission
+==================================================
+Build a dedicated particle workspace/tab for creating, editing, previewing, and applying real-time particle effects to video/motion projects.
+
+Target outcome:
+- fast authoring of production particle effects,
+- timeline-driven parameter animation,
+- reusable effect presets and packs,
+- stable playback/render integration across platforms.
+
+==================================================
+1) Core requirements
+==================================================
+- Dedicated full-screen in-app room/page: "Particle Room".
+- Effekseer-based particle runtime integration.
+- In-app particle editor with node/stack-style parameter editing (implementation choice allowed).
+- Real-time preview with deterministic final render handoff.
+- Library/preset browser for particle templates.
+- Full integration with project assets and timeline.
+
+==================================================
+2) Particle authoring capabilities
+==================================================
+MVP authoring:
+- emitters, spawn rate, lifetime, velocity, acceleration
+- shape emitters (point/sphere/box/cone)
+- size/rotation/color over lifetime
+- forces (gravity/wind/turbulence basic)
+- blend modes and additive workflows
+- texture/material assignment from project assets
+- sprite sheet/flipbook support (basic)
+
+Phase 2+:
+- trails/ribbons
+- event triggers and sub-emitters
+- advanced turbulence/noise modules
+- mesh particles and 3D space interaction
+
+==================================================
+3) Room layout
+==================================================
+Suggested Particle Room layout:
+- Left: effect hierarchy and emitter list
+- Center: particle viewport
+- Right: inspector (emitter/material/force/animation)
+- Bottom: timeline strip + curve editor + diagnostics
+
+Viewer requirements:
+- rulers and guides
+- safe margins and grid toggles
+- camera controls for 2D/3D particle preview
+- play/pause/step and quality modes
+
+==================================================
+4) Timeline integration
+==================================================
+- Particle effects appear as layers/effect instances in main timeline.
+- All exposed particle parameters must be animatable via keyframes.
+- Curve editor integration for precise control.
+- Support frame-range enabling/disabling and segment trimming.
+- Support effect baking to cache/rendered pass when needed.
+- Particle tracking integration:
+  - bind emitter/object to 2D track points
+  - bind emitter/object to planar/object tracks where available
+  - support camera-solve-aligned particle placement in 3D-aware scenes
+  - per-track offset/rotation/scale correction controls
+
+==================================================
+4.1) Particles + tracking workflow
+==================================================
+- User can attach particle emitters to existing project tracking data.
+- Tracked binding must follow motion over time with confidence-aware updates.
+- If track confidence drops, UI warns user and allows manual correction.
+- Re-track updates should preserve emitter setup non-destructively.
+
+==================================================
+5) Asset and preset system
+==================================================
+- Import textures/material maps from project bin.
+- Save/load particle presets and template packs.
+- Versioned preset schema with migration rules.
+- Favorites/recent presets and tagging.
+- Per-preset metadata: author, version, dependencies, license.
+
+==================================================
+6) Effekseer integration architecture
+==================================================
+Components:
+1. Particle Bridge Layer
+- maps app-side data model <-> Effekseer runtime representation
+
+2. Runtime Service
+- runs particle simulation and preview render
+- provides deterministic frame evaluation API
+
+3. Editor Adapter
+- syncs inspector controls with runtime and timeline
+
+4. Render Handoff
+- passes particle output into compositor/render graph
+
+Data flow:
+Particle Room UI -> Particle Bridge -> Effekseer Runtime -> Preview/Render Output -> Compositor
+
+==================================================
+7) Performance model
+==================================================
+- Real-time interactive preview is mandatory.
+- LOD/scalability controls for heavy scenes.
+- Async updates for expensive parameter edits.
+- Partial updates when only selected emitters change.
+- Non-blocking UI policy.
+
+Quality modes:
+- Draft / Preview / Final
+
+==================================================
+8) Color and compositing behavior
+==================================================
+- Respect project color pipeline and bit depth.
+- Correct alpha handling (premult/unpremult rules).
+- Consistent appearance between room preview and final render.
+- Blend mode parity with main compositing pipeline.
+
+==================================================
+9) Diagnostics and debugging
+==================================================
+Must include:
+- per-emitter performance stats
+- particle count and overdraw hints
+- missing texture/material warnings
+- runtime error badges with clear resolution hints
+
+==================================================
+10) Cross-platform and device support
+==================================================
+- Linux/Windows/macOS support is required.
+- Behavior should be consistent across APIs/backends.
+- Stable fallback paths for unsupported hardware features.
+
+==================================================
+11) MVP scope
+==================================================
+Include:
+- Full-screen Particle Room
+- Core emitter modules and inspector
+- Real-time preview + timeline parameter animation
+- Particle-to-track binding (2D track attach MVP)
+- Project texture integration
+- Preset save/load system
+- Render handoff back to main timeline/compositor
+
+Exclude initially:
+- distributed particle simulation
+- advanced mesh VFX toolchains
+- full scripting API for particle graph
+
+==================================================
+12) Definition of Done
+==================================================
+- User can create and edit production-usable particle effects in-app.
+- Key particle parameters are fully animatable on timeline.
+- Presets are reusable and portable within project ecosystem.
+- Playback remains responsive in common workloads.
+- Final render matches Particle Room preview behavior.
+
+==================================================
+13) Execution output format
+==================================================
+When asked to "start", provide:
+1. Particle Room architecture blueprint v0.1
+2. Effekseer bridge API contract draft
+3. MVP emitter/inspector feature breakdown
+4. Timeline animation integration plan
+5. Performance budget and diagnostics plan
+6. Test matrix and phased roadmap
+
+==================================================
+MANDATORY UI INTEGRATION REQUIREMENT
+==================================================
+- This plugin/room must operate strictly inside our native application interface.
+- All particle authoring, previewing, diagnostics, and apply actions must happen in-app.
+- External tools must not be required for normal particle workflow.
+
+==================================================
+NATIVE GPU ACCELERATION REQUIREMENT
+==================================================
+- Full native GPU acceleration is mandatory where applicable.
+- If GPU is available, heavy particle simulation/preview/render workloads must default to GPU.
+- CPU fallback is allowed only when GPU is unavailable/unsupported or explicitly disabled.
+
+Apple Silicon requirement:
+- Full support for Apple Silicon M1, M2, M3, and M4 families is mandatory.
+- On macOS, use Metal-native acceleration paths for supported particle workloads.

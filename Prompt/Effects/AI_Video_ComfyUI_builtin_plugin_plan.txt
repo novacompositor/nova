@@ -1,0 +1,360 @@
+AI Video Built-in Plugin Plan (ComfyUI-based, Krita-like UX)
+
+Purpose:
+- Define an out-of-the-box AI plugin for video workflows inside AE-like compositor.
+- Reuse the successful product pattern of the Krita AI Diffusion plugin (managed backend, strong defaults, queue, history), but adapted for timeline/video production.
+
+Target capabilities (MVP+):
+1. Region generation on existing video (video inpaint/outpaint in selected area)
+2. Full footage generation from text (text-to-video)
+3. Video generation from image (image-to-video)
+4. AI object removal from ready video (content-aware temporal inpaint)
+
+Core requirement:
+- ComfyUI is bundled/managed by our app (private runtime), not required as a separate system installation.
+
+==================================================
+1) Reference pattern adopted from Krita plugin
+==================================================
+Design principles adapted from Krita AI Diffusion:
+- Integrated panel/dock UI inside host app
+- "Configure" flow with local managed server option
+- Optional custom/remote server mode for advanced users
+- Job queue and cancellation
+- History panel for results and parameters
+- Strong defaults and presets first, advanced controls optional
+
+Video-specific adaptation:
+- All operations are timeline-aware and frame-range scoped.
+- Outputs are clips/layers/passes, not just still images.
+- Temporal consistency controls are first-class.
+
+==================================================
+2) User-facing module
+==================================================
+Plugin name (working):
+- AI Video Studio
+
+Main tabs:
+1. Fill/Replace (Selected Region)
+2. Remove Object
+3. Text-to-Video
+4. Image-to-Video
+5. Queue
+6. History
+7. Configure
+
+Quick action flow:
+- Select clip or frame range
+- (Optional) draw mask / select tracked region
+- Enter prompt or choose preset
+- Choose quality profile (Draft/Standard/Final)
+- Generate -> preview -> commit to timeline as new layer/clip
+
+==================================================
+3) Backend architecture (managed ComfyUI)
+==================================================
+Components:
+1. Host AI Bridge
+- UI bindings, validation, job orchestration, timeline integration
+
+2. Managed Comfy Runtime
+- Bundled ComfyUI runtime in app data folder
+- Managed startup/shutdown/update by host app
+- Dedicated Python environment isolated from system Python
+
+3. Workflow Library
+- Versioned Comfy workflows shipped with app
+- Workflow templates per mode (inpaint, remove, t2v, i2v)
+
+4. Model Manager
+- Downloads, verifies, versions required models
+- Handles optional model packs and disk budgeting
+
+5. Inference Worker
+- Executes jobs asynchronously
+- Supports multiple backend profiles (CUDA, ROCm/DirectML/MPS/CPU where possible)
+
+6. Result Integrator
+- Imports generated video/frames/mattes into timeline
+- Preserves prompt, seed, workflow metadata for reproducibility
+
+==================================================
+4) Managed server modes
+==================================================
+Mode A: Local Managed (default)
+- App installs and maintains its own Comfy runtime.
+- Zero manual ComfyUI setup for end users.
+
+Mode B: Custom Local/Remote (advanced)
+- User may connect existing server endpoint.
+- Compatibility checks against required nodes/workflows.
+
+Policy:
+- Product experience optimized around Mode A.
+- Mode B is opt-in and explicitly "advanced".
+
+==================================================
+5) Feature specs
+==================================================
+5.1 Region generation on ready video
+- Input: source clip + mask/selection + frame range
+- Optional tracking: propagate mask across frames
+- Output: inpainted clip with temporal consistency
+
+Controls:
+- Prompt / negative prompt
+- Strength
+- Preserve motion
+- Temporal consistency
+- Edge blend
+
+5.2 Text-to-Video
+- Input: text prompt (+ style preset)
+- Output: new generated clip with chosen duration/fps/resolution
+
+Controls:
+- Duration, fps, aspect, camera motion hint
+- Seed and variation
+- Motion intensity
+
+5.3 Image-to-Video
+- Input: still image (+ optional prompt)
+- Output: animated clip consistent with source image style/subject
+
+Controls:
+- Motion type preset (cinematic pan, subtle motion, loop, dynamic)
+- Strength and temporal guidance
+
+5.4 Object removal
+- Input: source clip + object mask + frame range
+- Pipeline: temporal inpaint + background reconstruction
+- Output: cleaned clip layer and optional cleanup matte
+
+Controls:
+- Track method (manual/auto)
+- Fill quality
+- Flicker suppression
+
+==================================================
+6) Timeline and compositor integration
+==================================================
+- Generation target can be:
+  - new top layer
+  - replacement clip
+  - pass stack (beauty/mask/depth when available)
+- Every job stores metadata:
+  - prompt, seed, model, workflow id, parameters, runtime version
+- One-click "Re-generate" and "Create variation" from history entry
+
+==================================================
+7) Workflow and node policy
+==================================================
+- Ship curated workflow set with strict versioning.
+- At startup, validate required nodes/models.
+- If missing, show guided installer for only required packages.
+- Lock default workflows for stability; allow "custom workflow" in advanced mode.
+
+==================================================
+8) Performance and reliability
+==================================================
+- Async queue with priorities (interactive vs background)
+- Cancel/retry per job
+- VRAM-aware tiling and fallback strategies
+- Frame chunking for long clips
+- Crash isolation: worker failure must not crash host app
+
+Quality profiles:
+- Draft: fastest preview
+- Standard: balanced
+- Final: highest consistency and quality
+
+==================================================
+9) Storage and cache
+==================================================
+- Dedicated AI data root (models, runtime, cache, outputs)
+- User-configurable disk quota
+- Automatic cleanup policy for old cache
+- Keep reproducible metadata even when cache frames are purged
+
+==================================================
+10) Cross-platform delivery (Linux/Windows/macOS)
+==================================================
+- Linux: primary support path, packaged runtime with driver profile checks
+- Windows: CUDA-first, fallback support paths
+- macOS: Apple Silicon profile and clear capability messaging
+
+At first run:
+- Hardware capability probe
+- Backend recommendation
+- Estimated performance tier shown to user
+
+==================================================
+11) Security and compliance
+==================================================
+- Managed runtime in sandboxed app-owned directories
+- No arbitrary script execution from untrusted workflows by default
+- Signed/verified workflow bundles recommended
+- Respect model licenses and provide attribution metadata where required
+
+==================================================
+12) UX patterns (Krita-like, video-ready)
+==================================================
+- Strong defaults with minimal setup
+- Progressive disclosure for advanced controls
+- Queue + history always visible
+- Non-blocking generation while editing timeline
+- "Fix common issues" helpers:
+  - flicker reduction
+  - edge halo cleanup
+  - motion wobble stabilization
+
+==================================================
+13) Observability and diagnostics
+==================================================
+Diagnostics panel includes:
+- runtime status (managed server online/offline)
+- model availability
+- node compatibility
+- backend selected (CUDA/ROCm/DirectML/MPS/CPU)
+- recent errors and logs shortcut
+
+==================================================
+14) MVP scope
+==================================================
+Include:
+- Managed Comfy runtime install/update
+- Region inpaint for selected video range
+- Object removal (mask-guided)
+- Text-to-video (short clips)
+- Image-to-video (short clips)
+- Queue, cancel, history, regenerate
+
+Exclude initially:
+- multi-user distributed generation farm
+- full custom node marketplace in-app
+- long-form feature-length generation optimization
+
+==================================================
+15) Acceptance criteria
+==================================================
+- User can install and run AI plugin without manual ComfyUI system setup.
+- All four core workflows operate inside timeline UX.
+- Jobs run async and do not block editing.
+- Outputs are reproducible via saved metadata (seed/workflow/model).
+- Plugin stable on Linux/Windows/macOS baseline test matrix.
+
+==================================================
+16) Implementation roadmap
+==================================================
+Phase 1 (Foundation):
+- Managed runtime installer
+- server lifecycle manager
+- queue + history framework
+
+Phase 2 (Core video features):
+- region inpaint + object removal
+- t2v/i2v base workflows
+- timeline insertion and metadata roundtrip
+
+Phase 3 (Quality and scale):
+- temporal consistency improvements
+- performance optimizations
+- advanced presets and model packs
+
+==================================================
+17) Immediate next steps
+==================================================
+1. Define bridge protocol v0.1 between host and managed Comfy runtime.
+2. Freeze MVP workflow templates and required node/model set.
+3. Implement first-run managed installer UX.
+4. Add queue/history schema with reproducibility metadata.
+5. Run pilot tests on Linux first, then Windows and macOS.
+
+
+==================================================
+MANDATORY UI INTEGRATION REQUIREMENT
+==================================================
+- This plugin must operate strictly inside our program interface.
+- All user-facing controls, previews, settings, timeline actions, and final outputs must be handled in our native UI.
+- External tools/runtimes (including Blender/ComfyUI or similar) are backend workers only and must not replace or become the primary user interface.
+- The user workflow must remain fully native to our application from start to finish.
+
+==================================================
+18) Critical foundations to lock in early
+==================================================
+Reproducibility:
+- Save prompt/negative prompt, seed, model version, workflow_id, runtime version, and major generation parameters in metadata of every result.
+- Store metadata both in project file references and in sidecar JSON for external auditing/rebuild.
+
+Security:
+- Use sandboxed plugin-owned folders for runtime, models, temp files, and outputs.
+- Allow only trusted curated workflows by default (signed/verified workflow bundle policy).
+- Treat custom workflow mode as advanced and explicitly warn about trust boundaries.
+
+Performance:
+- All generation jobs must be asynchronous.
+- UI must remain non-blocking while jobs run.
+- Provide quality profiles: Draft / Standard / Final.
+- Add VRAM-aware chunking/tiling for long/high-resolution clips.
+
+Diagnostics:
+- Show clear runtime status, model status, and node compatibility.
+- Show active backend (CUDA/ROCm/MPS/CPU/DirectML where applicable).
+- Keep structured logs with job_id correlation for fast debugging.
+
+==================================================
+19) MVP that should be built first (practical priority)
+==================================================
+Only two scenarios for initial production MVP:
+1. Remove Object (mask + frame range)
+2. Region Fill/Replace (inpaint by mask)
+
+Why:
+- Delivers immediate practical value for editors/compositors.
+- Validates the complete end-to-end pipeline:
+  host UI -> mask/range input -> managed Comfy workflow -> result import -> timeline commit.
+
+After this MVP is stable, next step:
+- Define and implement `job protocol v0.1` (JSON request/response schemas + status lifecycle) in monorepo.
+
+==================================================
+20) Mask and object tracking strategy for AI operations
+==================================================
+Goal:
+- AI should modify only selected masked/object-tracked areas, never regenerate the whole frame unless user explicitly requests it.
+
+Tracking modes:
+1. Manual keyframed masks (Bezier/shape masks in host timeline)
+2. Assisted point/planar tracking to propagate masks
+3. Object-tracking mode (ID-based tracking for moving subjects)
+
+Pipeline behavior:
+- Build per-frame mask stream for selected frame range.
+- Apply feather/expand/erode controls before inference.
+- Send ROI crop + mask to AI workflow when possible (reduces compute and preserves untouched pixels).
+- Composite generated ROI back onto original frame with edge blending and temporal smoothing.
+
+Required controls in UI:
+- Track forward/backward
+- Reacquire/lost track fix
+- Confidence overlay and drift warnings
+- Lock protected regions (do-not-change mask)
+
+Quality safeguards:
+- Temporal consistency check between adjacent frames.
+- Flicker detector for mask boundary regions.
+- Automatic fallback: if tracking confidence drops below threshold, pause job and request user correction.
+
+==================================================
+NATIVE GPU ACCELERATION REQUIREMENT
+==================================================
+- Full native GPU acceleration is mandatory.
+- If a discrete or integrated GPU is available, heavy compute/render/inference workloads must be delegated to GPU by default.
+- CPU fallback is allowed only when GPU is unavailable, unsupported, or explicitly disabled by user policy.
+- Runtime must include GPU capability detection and automatic backend selection for best performance/stability.
+
+Apple Silicon requirement:
+- Full support for Apple Silicon M1, M2, M3, and M4 families is mandatory.
+- On macOS, GPU paths must use Metal-native acceleration for supported workloads.
+- Feature parity and reliability targets on Apple Silicon must match other primary platforms for core plugin workflows.

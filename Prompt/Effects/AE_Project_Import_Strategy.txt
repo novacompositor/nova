@@ -1,0 +1,190 @@
+AE Project Import Strategy (Legal, Practical, Incremental)
+
+Purpose:
+- Define a realistic and legally safe strategy to import original After Effects projects into our compositor.
+- Maximize migration success for users while avoiding false promise of 100% binary parity.
+
+==================================================
+1) Reality check
+==================================================
+Short answer:
+- Full 1:1 compatibility with all .aep projects is not realistic in early stages.
+- High-value partial compatibility is realistic and should be productized.
+
+Goal for users:
+- "Most common motion/compositing projects should import with actionable fidelity and clear diagnostics."
+
+==================================================
+2) Legal and compliance constraints
+==================================================
+- Use clean-room implementation only.
+- No Adobe source code, binaries, SDK internals, or protected assets.
+- Compatibility must be achieved via original parser/converters and open/intermediate workflows.
+- Product messaging must avoid guarantee of exact binary parity.
+
+==================================================
+3) Import architecture
+==================================================
+Core components:
+1. Import Frontend
+- User selects AE project package and options
+- Chooses import mode (safe/basic/extended)
+
+2. Parser Layer
+- Reads project structure and extracts transferable entities
+- Handles asset references and metadata normalization
+
+3. Mapping Layer
+- Maps AE concepts -> internal project schema
+- Uses compatibility rules and fallback substitutions
+
+4. Compatibility Engine
+- Feature capability matrix and conversion policies
+- Marks unsupported features with warnings
+
+5. Import Report Generator
+- Detailed report of imported/partially imported/skipped items
+- Suggested manual fixes and replacements
+
+==================================================
+4) Import modes
+==================================================
+Mode A: Safe Import (default)
+- Only high-confidence transferable items
+- Prioritizes project stability over aggressive conversion
+
+Mode B: Extended Import
+- Tries broader feature mapping with fallbacks
+- May produce more warnings but higher coverage
+
+Mode C: Proxy/Render Assist Import
+- For complex unsupported comps, imports proxy renders and structure hints
+
+==================================================
+5) Compatibility tiers
+==================================================
+Tier 1 (MVP, target first):
+- Project hierarchy/folders
+- Composition settings (size, fps, duration)
+- Basic layers (footage/solid/text basic)
+- Transforms and basic keyframes (linear/hold/basic bezier)
+- Basic masks and blend modes (subset)
+- Asset relink support
+
+Tier 2:
+- Precomps and deeper nesting fidelity
+- More interpolation details and graph mapping
+- Core built-in effect mapping (subset with equivalents)
+- Matte workflows and more blending controls
+
+Tier 3:
+- Broader effect coverage with compatibility replacements
+- Partial expression translation (where feasible)
+- Better text animator mapping
+
+Tier 4 (long-term):
+- Advanced/edge legacy behaviors
+- Complex expression ecosystems and plugin-dependent projects
+
+==================================================
+6) Known hard problems
+==================================================
+- Third-party effects/plugins in AE projects
+- Expressions with host-specific APIs and assumptions
+- Font mismatches and typography shaping differences
+- Color pipeline mismatches
+- Legacy project quirks and undocumented behaviors
+
+Approach:
+- Never fail silently.
+- Always surface structured warnings + workaround paths.
+
+==================================================
+7) Fallback and replacement policy
+==================================================
+For unsupported feature X:
+1. Attempt equivalent mapping to built-in effect/feature.
+2. If unavailable, create placeholder node/layer with warning badge.
+3. Add entry in import report with suggested user action.
+
+Optional helper features:
+- "Auto-replace with nearest equivalent"
+- "Mark all unresolved items" panel
+- "Re-import after adding missing assets/fonts" action
+
+==================================================
+8) Import report (must-have)
+==================================================
+Every import should generate:
+- Summary score (import fidelity)
+- Imported items count
+- Partial items count
+- Skipped items count
+- Unresolved dependencies (fonts/plugins/assets)
+- Exact list of substitutions/fallbacks
+
+Report output:
+- UI summary panel
+- Exportable JSON/TXT audit report
+
+==================================================
+9) UX principles
+==================================================
+- Users should understand what happened in import within seconds.
+- Do not hide unsupported features.
+- Keep user in our interface with guided fix workflows.
+- Provide "migration presets" for common AE project styles.
+
+==================================================
+10) Testing strategy
+==================================================
+- Golden project suite with categorized AE samples
+- Regression tests for mapping logic
+- Fuzzing for parser robustness
+- Stress tests on large nested comps
+- Compatibility score tracking across releases
+
+Metrics:
+- successful import rate
+- unresolved critical items per project
+- manual fix time for top workflows
+
+==================================================
+11) Roadmap
+==================================================
+Phase 1:
+- Tier 1 support + import report + safe mode
+
+Phase 2:
+- Tier 2 mapping + effect subset + improved keyframe fidelity
+
+Phase 3:
+- Tier 3 expansion + expression subset + better text mapping
+
+Phase 4:
+- Long-tail edge cases, performance and enterprise migration tooling
+
+==================================================
+12) Definition of Done (initial)
+==================================================
+- Typical simple/mid AE projects import with useful fidelity.
+- Imported project is editable and renderable in our app.
+- Import report clearly explains all losses and substitutions.
+- No crashes on malformed or unsupported project files.
+
+==================================================
+13) Communication policy
+==================================================
+Public positioning:
+- "AE project import support (beta): best-effort compatibility with detailed migration report."
+- Avoid "100% compatible" claims.
+
+==================================================
+14) Immediate next steps
+==================================================
+1. Define internal compatibility matrix v0.1 (feature-by-feature).
+2. Build parser spike for structural extraction.
+3. Implement mapping for Tier 1 entities.
+4. Ship import report UI + JSON export.
+5. Create curated migration test corpus.
+

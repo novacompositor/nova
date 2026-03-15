@@ -1,11 +1,11 @@
+use chrono::{DateTime, Utc};
 use serde::{Deserialize, Serialize};
 use uuid::Uuid;
-use chrono::{DateTime, Utc};
 
-use crate::settings::ProjectSettings;
 use crate::asset::AssetRef;
 use crate::composition::Composition;
 use crate::sequence::Sequence;
+use crate::settings::ProjectSettings;
 
 /// Current schema version. Increment on breaking changes.
 pub const PROJECT_SCHEMA_VERSION: u32 = 1;

@@ -71,7 +71,9 @@ pub fn validate(project: &NovaProject) -> Vec<ValidationError> {
     // Check active composition
     if let Some(active_id) = project.active_composition_id {
         if !comp_ids.contains(&active_id) {
-            errors.push(ValidationError::ActiveCompositionNotFound(active_id.to_string()));
+            errors.push(ValidationError::ActiveCompositionNotFound(
+                active_id.to_string(),
+            ));
         }
     }
 

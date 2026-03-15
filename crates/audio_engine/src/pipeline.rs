@@ -6,5 +6,7 @@ pub struct AudioPipeline {
 }
 
 impl AudioPipeline {
-    pub fn new(sample_rate: u32) -> Self { Self { sample_rate } }
+    pub fn new(sample_rate: u32) -> Self {
+        Self { sample_rate }
+    }
 }

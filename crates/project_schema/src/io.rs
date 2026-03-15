@@ -1,8 +1,8 @@
-use std::fs;
-use std::path::{Path, PathBuf};
-use std::io::Write;
-use serde::{Deserialize, Serialize};
 use chrono::Utc;
+use serde::{Deserialize, Serialize};
+use std::fs;
+use std::io::Write;
+use std::path::{Path, PathBuf};
 
 use crate::schema::NovaProject;
 
@@ -15,33 +15,29 @@ impl ProjectIo {
     /// Atomically serialize and write a project to `path`.
     /// Strategy: write to `<path>.tmp` → fsync → rename.
     pub fn save(project: &NovaProject, path: &Path) -> Result<(), IoError> {
-        let json = serde_json::to_string_pretty(project)
-            .map_err(|e| IoError::Serialize(e.to_string()))?;
+        let json =
+            serde_json::to_string_pretty(project).map_err(|e| IoError::Serialize(e.to_string()))?;
 
         let tmp_path = path.with_extension("nova.tmp");
 
         {
-            let mut file = fs::File::create(&tmp_path)
-                .map_err(|e| IoError::Io(e.to_string()))?;
+            let mut file = fs::File::create(&tmp_path).map_err(|e| IoError::Io(e.to_string()))?;
             file.write_all(json.as_bytes())
                 .map_err(|e| IoError::Io(e.to_string()))?;
-            file.sync_all()
-                .map_err(|e| IoError::Io(e.to_string()))?;
+            file.sync_all().map_err(|e| IoError::Io(e.to_string()))?;
         }
 
-        fs::rename(&tmp_path, path)
-            .map_err(|e| IoError::Io(e.to_string()))?;
+        fs::rename(&tmp_path, path).map_err(|e| IoError::Io(e.to_string()))?;
 
         Ok(())
     }
 
     /// Load and deserialize a project from `path`.
     pub fn load(path: &Path) -> Result<NovaProject, IoError> {
-        let json = fs::read_to_string(path)
-            .map_err(|e| IoError::Io(e.to_string()))?;
+        let json = fs::read_to_string(path).map_err(|e| IoError::Io(e.to_string()))?;
 
-        let project: NovaProject = serde_json::from_str(&json)
-            .map_err(|e| IoError::Deserialize(e.to_string()))?;
+        let project: NovaProject =
+            serde_json::from_str(&json).map_err(|e| IoError::Deserialize(e.to_string()))?;
 
         Ok(project)
     }
@@ -49,8 +45,7 @@ impl ProjectIo {
     /// Create a `.pre_migration.bak` backup before migrating.
     pub fn backup_before_migration(path: &Path) -> Result<PathBuf, IoError> {
         let bak_path = path.with_extension("pre_migration.bak");
-        fs::copy(path, &bak_path)
-            .map_err(|e| IoError::Io(e.to_string()))?;
+        fs::copy(path, &bak_path).map_err(|e| IoError::Io(e.to_string()))?;
         Ok(bak_path)
     }
 }
@@ -72,15 +67,20 @@ impl AutosaveManager {
             .unwrap_or(Path::new("."))
             .join(format!(
                 "{}.autosave",
-                project_path.file_name().unwrap_or_default().to_string_lossy()
+                project_path
+                    .file_name()
+                    .unwrap_or_default()
+                    .to_string_lossy()
             ));
-        Self { snapshot_dir: dir, keep_count }
+        Self {
+            snapshot_dir: dir,
+            keep_count,
+        }
     }
 
     /// Write an autosave snapshot. Returns the snapshot path.
     pub fn write_snapshot(&self, project: &NovaProject) -> Result<PathBuf, IoError> {
-        fs::create_dir_all(&self.snapshot_dir)
-            .map_err(|e| IoError::Io(e.to_string()))?;
+        fs::create_dir_all(&self.snapshot_dir).map_err(|e| IoError::Io(e.to_string()))?;
 
         let timestamp = Utc::now().format("%Y%m%dT%H%M%SZ").to_string();
         let snap_path = self.snapshot_dir.join(format!("{}.nova", timestamp));
@@ -113,11 +113,9 @@ impl AutosaveManager {
 
     /// Write crash marker so recovery wizard knows to show on next launch.
     pub fn write_crash_marker(&self) -> Result<(), IoError> {
-        fs::create_dir_all(&self.snapshot_dir)
-            .map_err(|e| IoError::Io(e.to_string()))?;
+        fs::create_dir_all(&self.snapshot_dir).map_err(|e| IoError::Io(e.to_string()))?;
         let marker = self.snapshot_dir.join("CRASH_MARKER");
-        fs::write(&marker, Utc::now().to_rfc3339())
-            .map_err(|e| IoError::Io(e.to_string()))?;
+        fs::write(&marker, Utc::now().to_rfc3339()).map_err(|e| IoError::Io(e.to_string()))?;
         Ok(())
     }
 
@@ -125,8 +123,7 @@ impl AutosaveManager {
     pub fn clear_crash_marker(&self) -> Result<(), IoError> {
         let marker = self.snapshot_dir.join("CRASH_MARKER");
         if marker.exists() {
-            fs::remove_file(&marker)
-                .map_err(|e| IoError::Io(e.to_string()))?;
+            fs::remove_file(&marker).map_err(|e| IoError::Io(e.to_string()))?;
         }
         Ok(())
     }

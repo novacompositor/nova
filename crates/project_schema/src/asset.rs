@@ -35,7 +35,9 @@ pub struct AssetRef {
     pub label_color: Option<String>,
 }
 
-fn default_true() -> bool { true }
+fn default_true() -> bool {
+    true
+}
 
 impl AssetRef {
     pub fn new(id: Uuid, name: impl Into<String>, uri: impl Into<String>, kind: AssetKind) -> Self {
@@ -88,7 +90,9 @@ impl AssetKind {
         match ext.to_lowercase().as_str() {
             "mp4" | "mov" | "mkv" | "avi" | "webm" | "mxf" | "r3d" | "braw" => AssetKind::Video,
             "mp3" | "wav" | "aif" | "aiff" | "flac" | "ogg" | "m4a" => AssetKind::Audio,
-            "png" | "jpg" | "jpeg" | "tif" | "tiff" | "exr" | "dpx" | "hdr" | "psd" => AssetKind::Image,
+            "png" | "jpg" | "jpeg" | "tif" | "tiff" | "exr" | "dpx" | "hdr" | "psd" => {
+                AssetKind::Image
+            }
             _ => AssetKind::Data,
         }
     }

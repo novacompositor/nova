@@ -1,6 +1,6 @@
+use engine_api::types::{ColorProfile, FrameRate, RationalTime, Resolution};
 use serde::{Deserialize, Serialize};
 use uuid::Uuid;
-use engine_api::types::{Resolution, FrameRate, ColorProfile, RationalTime};
 
 use crate::asset::AssetKind;
 use crate::composition::Transform;
@@ -75,30 +75,32 @@ pub struct Clip {
     pub id: Uuid,
     pub name: String,
     pub item: ClipItem,
-    
+
     /// Global start time where this clip begins on the timeline track.
     pub start_time: RationalTime,
-    
+
     /// The start time within the source media (i.e., trim in-point).
     /// If the media is 10s long, and `source_in` is 2s, we ignore the first 2s.
     pub source_in: RationalTime,
-    
+
     /// The duration of the clip *on the timeline*.
     /// E.g., if duration is 5s, it plays from `source_in` to `source_in + 5s`.
     pub duration: RationalTime,
-    
+
     /// Playback speed multiplier (1.0 = normal, -1.0 = reverse, 2.0 = 2x speed).
     pub speed: f64,
 
     /// Enabled state for whether the clip is active during playback/render.
     #[serde(default = "default_true")]
     pub enabled: bool,
-    
+
     /// Transform properties on the track timeline (Scale/Position/Rotation).
     pub transform: Transform,
 }
 
-fn default_true() -> bool { true }
+fn default_true() -> bool {
+    true
+}
 
 impl Clip {
     pub fn new_asset(
@@ -112,7 +114,10 @@ impl Clip {
         Self {
             id: Uuid::new_v4(),
             name: name.into(),
-            item: ClipItem::Asset { asset_id, asset_kind },
+            item: ClipItem::Asset {
+                asset_id,
+                asset_kind,
+            },
             start_time,
             source_in,
             duration,
@@ -128,7 +133,10 @@ impl Clip {
 #[serde(tag = "type")]
 pub enum ClipItem {
     /// A reference to an imported project asset (Video, Audio, Image).
-    Asset { asset_id: Uuid, asset_kind: AssetKind },
+    Asset {
+        asset_id: Uuid,
+        asset_kind: AssetKind,
+    },
     /// A nested composition serving as a clip.
     Composition { composition_id: Uuid },
     /// A nested sequence serving as a clip.

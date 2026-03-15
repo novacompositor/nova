@@ -1,0 +1,190 @@
+Color Grading Room Prompt: Precision Grading with Masks and Tracking
+
+Role:
+You are a Principal Color Science and Finishing Systems Architect.
+Design and implement a dedicated built-in plugin/workspace for professional, precise color correction and grading.
+
+==================================================
+0) Mission
+==================================================
+Build a standalone full-screen grading room/tab for high-end color workflows,
+with fine control tools, mask-based selective grading, and robust tracking.
+
+The experience should feel comparable in power and speed to pro grading plugins/workflows,
+while being fully native in our application.
+
+==================================================
+1) Product intent
+==================================================
+The Color Grading Room must allow users to:
+- perform primary and secondary color correction,
+- isolate subjects/regions with masks and qualifiers,
+- track masks and corrections over time,
+- grade with accurate scopes and color-management awareness,
+- deliver stable, repeatable grading results for video projects.
+
+==================================================
+2) Core requirements (must-have)
+==================================================
+- Dedicated full-screen in-app room/page: "Color Grading Room"
+- Node/stack-friendly grading pipeline inside room (MVP can start stack-first)
+- Primary controls: exposure, contrast, pivot, temperature, tint, saturation, lift/gamma/gain, offset
+- Secondary controls: HSL qualifiers, hue-vs-hue/sat/luma curves, selective corrections
+- Advanced tone tools: wheels, log controls, filmic contrast controls
+- Shot match assist and reference stills
+- Before/after compare and split view
+
+Masking and tracking:
+- Full support for project masks (import/link from main timeline)
+- Native drawing/editing of grading masks (ellipse, polygon, freeform)
+- Feather/expand/erode/invert and multi-mask combinations
+- Tracking by point/planar/object where available
+- Frame-range control and keyframe override for track correction
+
+==================================================
+3) Dedicated room layout
+==================================================
+Suggested layout:
+- Left: shot list / clip browser
+- Center: large grading viewer
+- Right: grading controls (primary/secondary/mask/tracking)
+- Bottom: scopes panel + timeline mini strip
+
+Viewer requirements:
+- ruler and guide overlays
+- safe area overlays
+- high-precision pixel readout
+- A/B compare modes
+
+==================================================
+4) Color science and management
+==================================================
+Must support:
+- 8/16/32-bit processing paths (project dependent)
+- Professional color profile workflows
+- Input/working/output color transform policy
+- LUT loading (technical + creative)
+- Consistent preview/final render color behavior
+
+Color profiles:
+- Provide common professional presets and custom profile selection.
+- Per-timeline/project color profile awareness is required.
+
+==================================================
+5) Scopes and analysis tools
+==================================================
+Required scopes:
+- waveform (luma + RGB)
+- vectorscope
+- histogram
+- RGB parade
+
+Requirements:
+- real-time scope updates during grading
+- optional skin-tone line guides
+- highlight/clipping warnings
+
+==================================================
+6) Mask + tracking pipeline details
+==================================================
+- Masks are timeline-aware and versioned per clip/shot.
+- User can bind correction nodes/layers to one or more masks.
+- Tracking pipeline propagates masks across frames with confidence metrics.
+- If confidence drops, UI flags frames for manual correction.
+- Track data is editable and non-destructive.
+
+Performance behavior:
+- Track in background asynchronously
+- Maintain interactive grading controls while tracking runs
+
+==================================================
+7) Integration with main project
+==================================================
+- Color grades are stored as editable grading stacks/presets in project data.
+- Grades can be copied/pasted across clips and saved as reusable looks.
+- Grades and masks remain linked to source timeline edits where possible.
+- Render queue receives exact grading state and color pipeline metadata.
+
+==================================================
+8) Workflow presets
+==================================================
+Provide built-in grading presets:
+- neutral correction
+- cinematic contrast
+- skin tone recovery
+- log-to-display technical base
+- broadcast-safe output prep
+
+Presets must be starting points (fully editable), not destructive final locks.
+
+==================================================
+9) Performance and responsiveness
+==================================================
+- Grading room must feel responsive on long timelines and high-res media.
+- Interactive operations should prioritize visible shot/region updates.
+- Async background tasks for heavy analysis/tracking.
+- Minimal UI blocking policy.
+
+==================================================
+10) Diagnostics and reliability
+==================================================
+Must include:
+- per-operation error reporting
+- track confidence and drift warnings
+- missing LUT/profile warnings
+- render parity checks (preview vs final)
+
+==================================================
+11) MVP scope
+==================================================
+Include:
+- Full-screen Color Grading Room
+- Primary and secondary correction core tools
+- Scopes panel (waveform/vectorscope/histogram/parade)
+- Mask drawing/editing + project mask linking
+- Tracking integration for masks
+- Presets and still/reference compare
+
+Exclude initially:
+- deep collaborative grading sessions
+- advanced AI auto-grade pipelines
+- full DI conform toolset
+
+==================================================
+12) Definition of Done
+==================================================
+- User can perform production-usable precise grading in dedicated room.
+- Selective correction via masks and tracking is stable and editable.
+- Scopes are accurate and usable for professional decisions.
+- Color behavior is consistent from preview to final render.
+- Workflow remains fully native in our application UI.
+
+==================================================
+13) Execution output format
+==================================================
+When asked to "start", provide:
+1. Color Grading Room architecture v0.1
+2. Color pipeline and profile policy
+3. Toolset MVP breakdown (primary/secondary/scopes)
+4. Mask+tracking subsystem plan
+5. Performance budget
+6. Test matrix and phased roadmap
+
+==================================================
+MANDATORY UI INTEGRATION REQUIREMENT
+==================================================
+- This plugin must operate strictly inside our program interface.
+- All user-facing controls, grading actions, mask/tracking workflows, and outputs must be in-app.
+- External tools must not be required for normal grading workflow.
+
+==================================================
+NATIVE GPU ACCELERATION REQUIREMENT
+==================================================
+- Full native GPU acceleration is mandatory for grading/scopes/render paths where applicable.
+- If GPU is available, heavy processing should default to GPU.
+- CPU fallback is allowed only when GPU is unavailable/unsupported or explicitly disabled.
+
+Apple Silicon requirement:
+- Full support for Apple Silicon M1, M2, M3, and M4 families is mandatory.
+- On macOS, use Metal-native acceleration paths for supported workloads.
+

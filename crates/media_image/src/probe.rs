@@ -1,5 +1,5 @@
-use std::path::Path;
 use crate::error::MediaImageError;
+use std::path::Path;
 
 #[derive(Debug, Clone, PartialEq)]
 pub enum ImageKind {
@@ -18,8 +18,12 @@ pub struct ImageInfo {
 }
 
 pub fn probe_image(path: &Path) -> Result<ImageInfo, MediaImageError> {
-    let ext = path.extension().unwrap_or_default().to_string_lossy().to_lowercase();
-    
+    let ext = path
+        .extension()
+        .unwrap_or_default()
+        .to_string_lossy()
+        .to_lowercase();
+
     match ext.as_str() {
         "svg" => {
             let svg_data = std::fs::read(&path)?;
@@ -27,7 +31,7 @@ pub fn probe_image(path: &Path) -> Result<ImageInfo, MediaImageError> {
             // usvg 0.43 parse
             let tree = usvg::Tree::from_data(&svg_data, &opt)?;
             let size = tree.size();
-            
+
             Ok(ImageInfo {
                 path: path.to_string_lossy().to_string(),
                 width: size.width() as u32,
@@ -35,11 +39,12 @@ pub fn probe_image(path: &Path) -> Result<ImageInfo, MediaImageError> {
                 has_alpha: true, // SVG inherently supports alpha
                 kind: ImageKind::VectorSvg,
             })
-        },
+        }
         "psd" => {
             let psd_data = std::fs::read(&path)?;
-            let psd = psd::Psd::from_bytes(&psd_data).map_err(|e| MediaImageError::Other(e.to_string()))?;
-            
+            let psd = psd::Psd::from_bytes(&psd_data)
+                .map_err(|e| MediaImageError::Other(e.to_string()))?;
+
             Ok(ImageInfo {
                 path: path.to_string_lossy().to_string(),
                 width: psd.width(),
@@ -47,18 +52,21 @@ pub fn probe_image(path: &Path) -> Result<ImageInfo, MediaImageError> {
                 has_alpha: true,
                 kind: ImageKind::PhotoshopPsd,
             })
-        },
+        }
         _ => {
             // Let `image` crate figure it out (PNG, JPG, etc.)
             let reader = image::io::Reader::open(path)?.with_guessed_format()?;
             let format = reader.format().ok_or(MediaImageError::UnsupportedFormat)?;
-            
+
             let dimensions = reader.into_dimensions()?;
             let has_alpha = match format {
-                image::ImageFormat::Png | image::ImageFormat::WebP | image::ImageFormat::Tiff | image::ImageFormat::Gif => true,
+                image::ImageFormat::Png
+                | image::ImageFormat::WebP
+                | image::ImageFormat::Tiff
+                | image::ImageFormat::Gif => true,
                 _ => false, // JPEG typically no alpha
             };
-            
+
             Ok(ImageInfo {
                 path: path.to_string_lossy().to_string(),
                 width: dimensions.0,

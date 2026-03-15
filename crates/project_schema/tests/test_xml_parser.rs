@@ -23,20 +23,20 @@ fn test_parse_basic_fcpxml() {
 </fcpxml>"#;
 
     let sequence = parse_fcpxml_sequence(xml).expect("Failed to parse valid XML");
-    
+
     assert_eq!(sequence.name, "Imported FCPXML Sequence");
     assert_eq!(sequence.video_tracks.len(), 1);
-    
+
     let v1 = &sequence.video_tracks[0];
     assert_eq!(v1.name, "V1");
     // We expect two clips on the V1 track (spine)
     assert_eq!(v1.clips.len(), 2);
-    
+
     assert_eq!(v1.clips[0].name, "Clip 1");
     // 5s duration
     assert_eq!(v1.clips[0].duration.value, 5);
     assert_eq!(v1.clips[0].duration.rate, 1);
-    
+
     // 2s source_in (start attribute in FCPXML)
     assert_eq!(v1.clips[0].source_in.value, 2);
     assert_eq!(v1.clips[0].source_in.rate, 1);

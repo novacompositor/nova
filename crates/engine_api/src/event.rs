@@ -1,17 +1,14 @@
-use serde::{Deserialize, Serialize};
-use crate::types::*;
 use crate::query::AssetKind;
+use crate::types::*;
+use serde::{Deserialize, Serialize};
 
 /// Events emitted asynchronously by the engine to notify the UI of state changes.
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 #[serde(tag = "type", content = "payload")]
 pub enum EngineEvent {
     // ---- Project ----
-
     /// Project state has changed (reload project tree).
-    ProjectChanged {
-        project_id: ProjectId,
-    },
+    ProjectChanged { project_id: ProjectId },
 
     /// A project was successfully opened.
     ProjectOpened {
@@ -21,15 +18,12 @@ pub enum EngineEvent {
     },
 
     /// Project was saved.
-    ProjectSaved {
-        path: String,
-    },
+    ProjectSaved { path: String },
 
     /// Project was closed.
     ProjectClosed,
 
     // ---- Timeline / Composition ----
-
     /// Timeline/composition state has been invalidated (re-query).
     TimelineInvalidated {
         composition_id: CompositionId,
@@ -38,7 +32,6 @@ pub enum EngineEvent {
     },
 
     // ---- Rendering / Playback ----
-
     /// A rendered frame is ready for display in the Viewer.
     FrameReady {
         composition_id: CompositionId,
@@ -76,13 +69,9 @@ pub enum EngineEvent {
     },
 
     /// Render job failed.
-    RenderFailed {
-        job_id: uuid::Uuid,
-        error: String,
-    },
+    RenderFailed { job_id: uuid::Uuid, error: String },
 
     // ---- Media / Assets ----
-
     /// Asset has become offline (file moved/deleted).
     MediaOfflineDetected {
         asset_id: AssetId,
@@ -90,10 +79,7 @@ pub enum EngineEvent {
     },
 
     /// Asset was re-linked and is online again.
-    MediaRelinked {
-        asset_id: AssetId,
-        new_path: String,
-    },
+    MediaRelinked { asset_id: AssetId, new_path: String },
 
     /// Asset import completed.
     AssetImported {
@@ -104,24 +90,14 @@ pub enum EngineEvent {
     },
 
     /// Asset import failed.
-    AssetImportFailed {
-        path: String,
-        error: String,
-    },
+    AssetImportFailed { path: String, error: String },
 
     // ---- GPU / System ----
-
     /// GPU backend has fallen back to CPU due to an error/unavailability.
-    GpuFallbackActivated {
-        reason: String,
-        backend_now: String,
-    },
+    GpuFallbackActivated { reason: String, backend_now: String },
 
     /// A recoverable engine warning (show in status bar, not a dialog).
-    Warning {
-        code: String,
-        message: String,
-    },
+    Warning { code: String, message: String },
 
     /// Autosave snapshot was written.
     AutosaveWritten {

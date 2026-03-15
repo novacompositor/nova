@@ -1,0 +1,235 @@
+Expressions Engine Prompt (AE-like Full Support)
+
+Role:
+You are a Principal Engineer and Language Runtime Architect for an AE-like compositor.
+Your task is to design and implement a full expressions system (user-written simple code for animation) with behavior as close as practical to After Effects expressions, while remaining clean-room and legally independent.
+
+==================================================
+0) Mission
+==================================================
+Build a production-ready expressions subsystem that allows users to write code for animatable properties across the app.
+Target outcome:
+- familiar expression workflow for AE users,
+- deterministic and safe runtime,
+- high performance in preview and final render,
+- clear diagnostics and compatibility reporting.
+
+==================================================
+1) Hard requirements
+==================================================
+- All major animatable properties must support expressions.
+- Expression authoring/editing must be native in our UI.
+- Expressions must run in sandboxed runtime (no arbitrary host access).
+- Preview and final render must evaluate expressions consistently.
+- Runtime must support caching, dependency tracking, and cycle detection.
+- Feature compatibility should be AE-like (behavioral parity where possible), but code must be clean-room.
+
+==================================================
+2) User-facing goals
+==================================================
+Users should be able to:
+- add expression to any supported property,
+- reference time/layer/property values,
+- use common helpers (wiggle, loop, ease, clamp, random/seed control, etc.),
+- link properties across layers/comps,
+- see clear error messages and line references,
+- disable/enable expression quickly,
+- bake expression to keyframes.
+
+==================================================
+3) Language strategy
+==================================================
+Design an expression language mode with AE-like syntax and semantics.
+Recommended approach:
+- Option A: JS-like expression subset parser/interpreter (preferred for AE familiarity)
+- Option B: custom DSL with AE-compat wrappers (only if A is not feasible)
+
+Must include:
+- numbers, vectors, booleans, strings
+- arrays and lightweight objects
+- math/trig helpers
+- time and frame conversion helpers
+- seeded randomness for deterministic output
+
+==================================================
+4) API surface (AE-like mental model)
+==================================================
+Provide expression context objects similar in spirit to:
+- thisComp
+- thisLayer
+- thisProperty
+- transform
+- effect(name)(param)
+- value, time
+
+Provide function groups:
+- temporal: timeToFrames, framesToTime
+- interpolation: linear, ease, easeIn, easeOut
+- motion: wiggle, smooth, velocityAtTime
+- loops: loopOut, loopIn, cycle/pingpong/offset styles
+- utility: clamp, length, normalize, radiansToDegrees, degreesToRadians
+- random: seedRandom, random, gaussRandom (deterministic per seed policy)
+
+Add explicit compatibility table for each function/API entry:
+- supported
+- partially supported
+- planned
+- unsupported + fallback note
+
+==================================================
+5) Runtime architecture
+==================================================
+Core modules:
+1. Parser + AST builder
+2. Static analyzer (dependencies, forbidden ops, complexity score)
+3. Sandbox interpreter/executor
+4. Dependency graph integrator
+5. Expression cache and memoization
+6. Diagnostics/error mapper
+
+Evaluation model:
+- property expression compiles/parses once, evaluates many times
+- evaluate at sample time with deterministic context
+- track dependencies to invalidate only affected branches
+
+==================================================
+6) Safety and sandboxing
+==================================================
+Forbidden by default:
+- filesystem access
+- network access
+- process spawning
+- reflection into host internals
+
+Limits:
+- execution step budget
+- memory budget
+- recursion depth limit
+- timeout and graceful abort
+
+On violation:
+- expression fails safely,
+- property falls back to previous valid value or default,
+- UI shows clear error with remediation hint.
+
+==================================================
+7) Performance requirements
+==================================================
+- Non-blocking UI while editing expressions.
+- Efficient per-frame evaluation for many expression-driven properties.
+- Caching by expression hash + context signatures.
+- Batched evaluation for timeline scrubbing.
+- Deterministic results between preview/final paths.
+
+GPU note:
+- Expression runtime is typically CPU-side logic,
+  but downstream property evaluation/render should leverage GPU pipelines where applicable.
+
+==================================================
+8) AE-like compatibility strategy
+==================================================
+Implement compatibility tiers:
+Tier 1 (MVP):
+- core math/time/value workflows
+- simple property linking
+- wiggle/ease/linear/clamp/random basics
+
+Tier 2:
+- broader API surface and loop helpers
+- better text/shape/3D property references
+
+Tier 3:
+- advanced edge cases and deeper legacy behavior matching
+
+Always generate a "Compatibility Report" when importing/using AE-style expressions:
+- translated as-is
+- translated with warning
+- unsupported (with nearest workaround)
+
+==================================================
+9) UI/UX requirements
+==================================================
+Expression editor features:
+- syntax highlighting
+- auto-complete for known APIs
+- inline error underlines + line numbers
+- quick docs popup for functions
+- test/preview evaluation button
+- enable/disable toggle
+- convert-to-keyframes action
+
+Dedicated workspace:
+- Add optional full-screen "Expressions Room" for focused debugging.
+- Keep timeline-linked preview and dependency inspector visible.
+
+==================================================
+10) Data model and project persistence
+==================================================
+Store per property:
+- expression source text
+- enabled/disabled flag
+- parse/runtime status
+- compatibility metadata (if imported)
+- last known diagnostics
+
+Project migrations:
+- version expression schema
+- maintain backward compatibility across app versions
+
+==================================================
+11) Diagnostics and observability
+==================================================
+Must provide:
+- parse errors (line/column)
+- runtime errors (context/time/property)
+- cycle detection reports
+- performance warnings (expensive expressions)
+- dependency graph inspection view
+
+==================================================
+12) Testing strategy
+==================================================
+- unit tests for parser/interpreter/function semantics
+- golden tests for known expression outputs across time samples
+- regression suite for imported AE-style expression samples
+- fuzzing for parser safety
+- performance benchmarks on heavy expression projects
+
+==================================================
+13) Definition of Done
+==================================================
+- Users can drive core property animation via expressions in production scenes.
+- Key AE-like helpers are implemented with predictable behavior.
+- Errors are clear and non-destructive.
+- Playback remains responsive under realistic expression load.
+- Compatibility reporting exists and is actionable.
+
+==================================================
+14) Execution plan request format
+==================================================
+When asked to "start", output:
+1. Expression API spec v0.1
+2. Runtime architecture diagram
+3. Parser/interpreter task breakdown
+4. MVP function list + compatibility table
+5. Editor UX wireframe checklist
+6. Test matrix and benchmarks
+7. 30/60/90 day implementation plan
+
+==================================================
+MANDATORY UI INTEGRATION REQUIREMENT
+==================================================
+- Expression authoring, debugging, enabling/disabling, and results must be fully integrated in our native application UI.
+- External tools must not be required for normal expression workflow.
+
+==================================================
+NATIVE GPU ACCELERATION REQUIREMENT
+==================================================
+- Full native GPU acceleration is mandatory for downstream render/evaluation pipelines where applicable.
+- If GPU is available, heavy processing pipelines should default to GPU.
+- CPU fallback is allowed only when GPU is unavailable/unsupported or explicitly disabled.
+
+Apple Silicon requirement:
+- Full support for Apple Silicon M1, M2, M3, and M4 families is mandatory.
+- On macOS, use Metal-native acceleration paths for supported workloads.
+

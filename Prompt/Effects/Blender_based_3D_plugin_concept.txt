@@ -1,0 +1,261 @@
+Blender-based Built-in 3D Plugin Concept (for AE-like Compositor)
+
+Working name:
+- Blender Bridge 3D (internal codename)
+
+Goal:
+- Create a built-in "out-of-the-box" 3D module that gives a fast motion-design workflow similar in spirit to popular AE 3D plugins, but implemented via Blender-powered pipeline and original product UX.
+
+Important legal/architecture rule:
+- Do NOT embed Blender source directly into host process unless full license implications are accepted.
+- Preferred model: run Blender as an external worker/service process and communicate via scene exchange + render outputs.
+- System-wide Blender installation must not be required for end users.
+- Blender runtime for this plugin must be bundled and managed by our application (private managed runtime).
+
+==================================================
+1) Product vision
+==================================================
+The module should let users:
+- import 3D models quickly,
+- create full 3D titles and animated text,
+- assign materials,
+- place lights/camera,
+- animate transforms,
+- preview in near real-time,
+- composite render passes directly in timeline.
+
+Primary user promise:
+- "3D motion graphics inside compositor without leaving the app for common tasks."
+
+==================================================
+2) UX concept (Element-like feel, but original)
+==================================================
+Panel set:
+1. Scene Setup
+- Add Model, Add Light, Add Camera, Environment settings
+
+2. Material Studio
+- Base color/metal/roughness/emission
+- Texture slots with drag-drop
+- Texture assignment from project assets (video/image sequences/stills), not only local file picks
+- Linked texture references: if source asset updates in project, 3D layer can refresh bindings
+
+3. 3D Text and Titles
+- Text objects with extrude/bevel/depth controls
+- Font/style presets and per-character animation groups (phase 2)
+- 3D text materials and lighting presets for title design
+
+4. Animation Controls
+- Transform keyframes per object
+- Group/null controls
+
+5. Render Passes
+- Beauty, Z-depth, Normals, Shadow, AO, Object ID
+
+6. Performance Controls
+- Draft/Preview/Final quality
+- Proxy textures
+- Sampling slider
+
+7. Dedicated 3D Room
+- Plugin opens in a dedicated full-screen in-app room/page ("3D Room")
+- 3D Room includes scene viewport, scene hierarchy, material/texture controls, animation controls, pass preview, and diagnostics
+- Enter/exit preserves timeline context and all edits non-destructively
+
+Expected workflow:
+1. User adds "Blender Bridge 3D Layer"
+2. Imports model(s) (.glb/.gltf/.obj/.fbx where supported)
+3. Tunes material/light/camera
+4. Sets keyframes in main timeline
+5. Gets multi-pass output into compositor layer stack
+
+==================================================
+3) Technical architecture
+==================================================
+Mode:
+- External process integration (recommended)
+
+Components:
+1. Host plugin runtime (inside compositor)
+- UI and parameter model
+- timeline sync
+- cache/index of rendered frames
+
+2. Scene translator
+- Converts host scene state -> Blender scene description
+- Maintains stable IDs for objects/materials/cameras
+
+3. Blender worker
+- Headless Blender process launched by host
+- Executes scripted scene build/update/render
+- Runtime is app-managed and bundled; no dependency on externally installed Blender
+
+4. Render bridge
+- Collects rendered outputs/passes
+- Sends frames to host cache and preview pipeline
+
+Data flow:
+Host UI/Timeline -> Scene translator -> Blender worker -> Render outputs -> Compositor
+
+==================================================
+4) Scene and asset formats
+==================================================
+Recommended scene interchange:
+- Internal JSON scene descriptor (versioned)
+
+Asset support (MVP):
+- Models: GLTF/GLB, OBJ
+- Textures: PNG/JPG/EXR
+- HDRI: EXR/HDR
+- Texture sources can be selected directly from existing project bin/assets
+
+Render outputs:
+- EXR multi-layer (preferred)
+- or separate pass image sequence per layer
+
+==================================================
+5) Rendering strategy
+==================================================
+MVP render backend:
+- Eevee for interactive previews
+
+Optional final quality mode:
+- Cycles for high-quality offline render
+
+Quality profiles:
+1. Draft (fast)
+2. Preview (balanced)
+3. Final (quality)
+
+Frame management:
+- Use frame cache + invalidation
+- Re-render only changed ranges when possible
+
+==================================================
+6) Timeline integration
+==================================================
+Parameters keyframe-able in host:
+- object transforms
+- material core params
+- camera focal length
+- light intensity/color
+- environment exposure/rotation
+- 3D text/title parameters (content style controls, extrude/bevel/depth, per-title transforms)
+
+Animation rule:
+- All user-exposed plugin parameters must be animatable in host timeline (keyframes, curves, interpolation, expressions-ready in future).
+
+Sync model:
+- Host timeline is source of truth
+- Blender worker evaluates requested frame/time and returns result
+
+==================================================
+6.1) Built-in effects compatibility on top of 3D layer
+==================================================
+Requirement:
+- Any built-in compositor effect must be applicable above Blender Bridge 3D Layer in the standard layer/effect stack.
+
+Compositing behavior:
+- 3D layer output (beauty/passes) enters normal host compositing pipeline.
+- User can stack color, blur, keying, distort, and other built-in effects above this layer.
+- Effect order, blend modes, masks, and mattes behave consistently with non-3D layers.
+
+==================================================
+7) Performance and stability requirements
+==================================================
+- Non-blocking UI (all Blender jobs async)
+- Job queue with cancel/restart
+- Crash isolation (worker crash must not crash host)
+- Automatic retry and safe fallback mode
+
+Targets (initial):
+- Fast preview feedback for common scenes
+- Deterministic final frame output for render queue
+
+==================================================
+8) Licensing and compliance
+==================================================
+- Treat Blender integration as external tool bridge model.
+- Keep clear separation between host code and Blender runtime process.
+- Document user requirements/dependencies for Blender runtime availability.
+- Keep branding original; avoid use of third-party trademarks in product naming.
+
+==================================================
+9) MVP scope (Phase 1)
+==================================================
+Include:
+- One 3D layer type (Blender Bridge 3D Layer)
+- Dedicated full-screen 3D Room in native UI
+- Bundled managed runtime (no system Blender installation requirement)
+- Import GLB/OBJ
+- Basic materials/lights/camera
+- Texture workflow from project assets (assign/relink/update)
+- Full 3D titles (text object, extrude/bevel/depth, material assignment)
+- Transform animation from host timeline
+- Animatable key parameters across scene/material/camera/light/text controls
+- Beauty + Z-depth + Shadow pass output
+- Built-in effects can be applied above this 3D layer in host stack
+- Preview + final export integration
+
+Exclude for now:
+- Advanced rigging/character animation
+- Geometry nodes deep editing UI
+- Full Blender node editor embedding
+
+==================================================
+10) Phase roadmap
+==================================================
+Phase 1 (MVP):
+- basic bridge, core scene controls, pass output
+
+Phase 2:
+- instancing/cloners, more passes, better material controls
+
+Phase 3:
+- advanced effects, motion blur improvements, studio presets
+
+==================================================
+11) Acceptance criteria
+==================================================
+- User can create a 3D scene inside compositor UI without manual Blender editing.
+- User can create and animate 3D titles directly in compositor UI.
+- Plugin works out of the box without Blender installed in the operating system.
+- User can complete workflow in dedicated full-screen 3D Room.
+- User can assign and relink textures directly from project assets.
+- Timeline keyframes drive 3D transforms correctly.
+- All exposed plugin parameters are keyframe-able and persist after reload.
+- At least three render passes are composited in host.
+- Built-in effects work correctly when applied above Blender Bridge 3D Layer.
+- Worker crash does not terminate main app.
+- Project re-open restores full 3D layer state.
+
+==================================================
+12) Suggested next implementation steps
+==================================================
+1. Define versioned JSON schema for 3D layer scene state.
+2. Build minimal Blender headless worker launcher.
+3. Implement one-way scene export + frame render return.
+4. Add host cache and async job queue.
+5. Expose first UI panel set (Scene Setup + Animation Controls).
+
+
+==================================================
+MANDATORY UI INTEGRATION REQUIREMENT
+==================================================
+- This plugin must operate strictly inside our program interface.
+- All user-facing controls, previews, settings, timeline actions, and final outputs must be handled in our native UI.
+- External tools/runtimes (including Blender/ComfyUI or similar) are backend workers only and must not replace or become the primary user interface.
+- The user workflow must remain fully native to our application from start to finish.
+
+==================================================
+NATIVE GPU ACCELERATION REQUIREMENT
+==================================================
+- Full native GPU acceleration is mandatory.
+- If a discrete or integrated GPU is available, heavy compute/render/inference workloads must be delegated to GPU by default.
+- CPU fallback is allowed only when GPU is unavailable, unsupported, or explicitly disabled by user policy.
+- Runtime must include GPU capability detection and automatic backend selection for best performance/stability.
+
+Apple Silicon requirement:
+- Full support for Apple Silicon M1, M2, M3, and M4 families is mandatory.
+- On macOS, GPU paths must use Metal-native acceleration for supported workloads.
+- Feature parity and reliability targets on Apple Silicon must match other primary platforms for core plugin workflows.

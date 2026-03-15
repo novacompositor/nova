@@ -2,16 +2,15 @@
 pub const ENGINE_API_VERSION: &str = "0.1.0";
 
 pub mod command;
+pub mod error;
 pub mod event;
 pub mod query;
-pub mod error;
 pub mod types;
 
 pub use command::EngineCommand;
+pub use error::EngineError;
 pub use event::EngineEvent;
 pub use query::{EngineQuery, QueryResult};
-pub use error::EngineError;
 pub use types::{
-    AssetId, CompositionId, LayerId, ProjectId,
-    RationalTime, Resolution, ColorProfile, AudioConfig,
+    AssetId, AudioConfig, ColorProfile, CompositionId, LayerId, ProjectId, RationalTime, Resolution,
 };
